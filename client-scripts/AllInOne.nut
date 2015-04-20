@@ -13,48 +13,46 @@ local eventsClick = ::EventHandler();
 local eventsKey = ::EventHandler();
 
 
-function onRender ()
+function onRender()
 {
 	eventsRender.Call();
 }
-function onPacket (data)
+function onPacket(data)
 {
 	eventsPacket.Call(data);
 }
 //PLAYER
-function onHit ()
+function onHit()
 {
 	eventsHit.Call();
 }
-function onDie ()
+function onDie()
 {
 	eventsDie.Call();
 }
-function onRespawn ()
+function onRespawn()
 {
 	eventsRespawn.Call();
 }
-function onStandUp ()
+function onStandUp()
 {
 	eventsStandUp.Call();
 }
-function onUnconscious ()
+function onUnconscious()
 {
 	eventsUnconscious.Call();
 }
 //CZAT
-function onCommand (command, params)
+function onCommand(command, params)
 {
-	local parameters ={ command = command, params = params};
-	eventsCommand.Call(parameters); 
+	eventsCommand.Call(command, params);
 }
 //INTERFACE
-function onClick (key, x, y, wheel)	
+function onClick()	
 {
-	local parameters ={ key = key, x = x, y = y, wheel = wheel};
-	eventsClick.Call(parameters)
+	eventsClick.Call(key, x, y, wheel)
 }
-function onKey (key)
+function onKey(key)
 {
 	eventsKey.Call(key)
 }
@@ -64,7 +62,7 @@ class GameSystem
 	
 }
 
-function onInit ()
+function onInit()
 {
 
 };
