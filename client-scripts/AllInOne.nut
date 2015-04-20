@@ -51,11 +51,12 @@ function onCommand (command, params)
 //INTERFACE
 function onClick (key, x, y, wheel)	
 {
-	eventsClick.Call(0)
+	local parameters ={ key = key, x = x, y = y, wheel = wheel};
+	eventsClick.Call(parameters)
 }
 function onKey (key)
 {
-	eventsKey.Call(0)
+	eventsKey.Call(key)
 }
 
 class GameSystem
@@ -63,16 +64,7 @@ class GameSystem
 	
 }
 
-function test1(params){	addMessage(255, 255, 255, "test 1");}
-function test2(params){	addMessage(255, 255, 255, "test 2");}
-function test3(params){	addMessage(255, 255, 255, "test 3");}
-
 function onInit ()
 {
-	eventsInit.Add(test1);
-	eventsInit.Add(test2);
-	eventsInit.Add(test3);
-	eventsInit.Remove(test2);
-	eventsInit.Add(test1);
-//	eventsInit.Call("XX");s
+
 };

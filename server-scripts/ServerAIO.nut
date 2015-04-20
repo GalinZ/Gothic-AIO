@@ -12,17 +12,29 @@ local eventsAdminCmd = ::EventHandler();
 local eventsMessage = ::EventHandler();
 local eventsPacket = ::EventHandler();
 
-function onInit()
-{
 
+function onPacket(pid, data)
+{
+	local table ={pid = pid, data = data};
+	eventsPacket.Call(table);
 }
 function onTick()
 {
 	eventsTick.Call();
 }
+//PLAYER
+function onInit()
+{
+
+}
 function onJoin(id)
 {
 	eventsJoin.Call(id);
+}
+function onDisconnect(pid, reason)
+{
+	local table ={pid = pid, reason = reason};
+	eventsDisconect.Call(table);
 }
 function onHit(pid, tid)
 {
@@ -38,20 +50,11 @@ function onRespawn(pid)
 {
 	eventsRespawn.Call(pid);
 }
-function onDisconnect(pid, reason)
-{
-	local table ={pid = pid, reason = reason};
-	eventsDisconect.Call(table);
-}
+//CHAT
 function onCommand(pid, command, params)
 {
 	local table ={pid = pid, command = command, params = params};
 	eventsCommand.Call(table);
-}
-function onPacket(pid, data)
-{
-	local table ={pid = pid, data = data};
-	eventsPacket.Call(table);
 }
 function onAdminCommand(pid, command)
 {
