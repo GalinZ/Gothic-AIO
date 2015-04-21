@@ -5,7 +5,7 @@ print("##################");
 print("");
 
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
-dofile("server-scripts\\AIOScripts\\GameSystem.nut");
+dofile("server-scripts\\AIOGames\\GameSystem.nut");
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
@@ -26,7 +26,7 @@ eventsCommand <- EventHandler();
 eventsAdminCmd <- EventHandler();
 eventsMessage <- EventHandler();
 
-game <- GameSystem();1
+game <- GameSystem();
 
 function onPacket(pid, data)
 {

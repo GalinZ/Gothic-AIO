@@ -1,5 +1,5 @@
 dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
-dofile("Multiplayer\\Script\\AIOScripts\\GameSystem.nut");
+dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();

@@ -16,7 +16,7 @@ class GameSystem
 		eventsDie, eventsRespawn, eventsStandUp, eventsUnconscious,
 		eventsTake, eventsDrop, eventsCommand, eventsAdminCmd,
 		eventsMessage];
-		currGame = "None"
+		currGame = "NONE"
 	}
 	
 	function AddPlayer(pid)
@@ -58,14 +58,24 @@ class GameSystem
 
 	function LoadGame(name)
 	{
+		if(name in listOfGame)
+		{
+			print(format("Zaladowano gre %s", name));
+			currGame = name;
+			listOfGame[name].OnInit();
+		}
+		else
+		{
+			print(format("Nie poprawna nazwa %s", name));
+		}
 	}
 }
 
 enum GameState
 {
-	OFF,
-	INITALIZE,
-	WAIT,
-	STARTED,
-	ENDED,
+	GS_OFF,
+	GS_INIT,
+	GS_WAIT,
+	GS_STARTED,
+	GS_ENDED,
 }

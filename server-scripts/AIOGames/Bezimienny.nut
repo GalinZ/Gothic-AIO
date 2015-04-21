@@ -1,10 +1,5 @@
 print("LOAD: GAME BEZIMIENNY");
 
-dofile("server-scripts\\AIOScripts\\PlayerParameters.nut");
-dofile("server-scripts\\AIOScripts\\HeroAttributes.nut");
-dofile("server-scripts\\AIOScripts\\HeroEquipment.nut");
-
-
 enum GameBeziPackets
 {
 	GBP_EQFORSOLDIER = 1001,
@@ -33,6 +28,7 @@ class GameBezimienny
 		system ={};
 		events ={};
 	}
+	
 	function OnInit()
 	{
 		system ={
@@ -60,6 +56,9 @@ class GameBezimienny
 		StandardEquipment();
 		StandardFunctions();
 		LoadPlayers();
+		
+		//eventsStart
+		//eventsEnd
 	}
 	
 	function LoadPlayers()
@@ -72,9 +71,9 @@ class GameBezimienny
 	
 	function StandardFunctions()
 	{
-		events[GameBeziFuncs.BEZI_KILL_SOLDIER] = EventHandler();
-		events[GameBeziFuncs.SOLDIER_KILL_BEZI] = EventHandler();
-		events[GameBeziFuncs.SOLDIER_HIT_BEZI]  = EventHandler();
+		events[GameBeziFuncs.BEZI_KILL_SOLDIER] <- EventHandler();
+		events[GameBeziFuncs.SOLDIER_KILL_BEZI] <- EventHandler();
+		events[GameBeziFuncs.SOLDIER_HIT_BEZI]  <- EventHandler();
 		
 		events[GameBeziFuncs.BEZI_KILL_SOLDIER] + BeziKillSoldier;
 		events[GameBeziFuncs.SOLDIER_KILL_BEZI] + SoldierKillBezi;
@@ -84,31 +83,22 @@ class GameBezimienny
 	function StandardEquipment()
 	{
 		//Soldier equipment
-		soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.IT_ARMOR);
-		soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.IT_MELLE);
-		soldierEq.Add("ITRW_CROSSBOW_03", 1, 1, ItemType.IT_DISTANCE);
-		soldierEq.Add("ITAMBOLT", 10, 1, ItemType.IT_OTHER);
+		system.soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.IT_ARMOR);
+		system.soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.IT_MELLE);
+		system.soldierEq.Add("ITRW_CROSSBOW_03", 1, 1, ItemType.IT_DISTANCE);
+		system.soldierEq.Add("ITAMBOLT", 10, 1, ItemType.IT_OTHER);
 		
 		//Bezimienny equipment
-		beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.IT_ARMOR);
-		beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.IT_MELLE);
+		system.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.IT_ARMOR);
+		system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.IT_MELLE);
 	}
 	
-	// CallBacks
-	function OnDie(pid, kid)
-	{
-	
-	}
-	
-	function OnHit(pid, tid)
-	{
-
-	}
 	//GAME START
 	function GameStart()
 	{
 		GameStartSendParameters();
 		ChooseBezimienny();
+		HookCallbackToGlobal();
 	}
 	
 	function GameStartSendParameters()
@@ -141,6 +131,14 @@ class GameBezimienny
 			sendPacket(system.bezimienny, paramsAtrB);
 		}
 	}
+	
+	function HookCallbackToGlobal()
+	{
+		eventsJoin + onJoin;
+		eventsDisconect + onDisconnect;
+		eventsHit + OnHit;
+		eventsDie + OnDie;
+	}
 	//Logic 
 	function BeziKillSoldier(beziID, soldierID)
 	{
@@ -162,4 +160,34 @@ class GameBezimienny
 	
 	}
 
+	// CallBacks
+	function onDie(pid, kid)
+	{
+	
+	}
+	
+	function onHit(pid, tid)
+	{
+
+	}
+	
+	function onJoin(id)
+	{
+		switch(system.state)
+		{
+		case GameState.GS_WAIT:
+			
+			break;
+		case GameState.GS_STARTED: 
+		
+			break;
+		}
+	}
+	
+	function onDisconnect(id, reason)
+	{
+	
+	}
+	
 }
+

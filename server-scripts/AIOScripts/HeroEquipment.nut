@@ -1,5 +1,13 @@
 print("LOAD: HERO EQUIPMENT");
 
+enum ItemType
+{
+	IT_OTHER,
+	IT_MELLE,
+	IT_DISTANCE,
+	IT_ARMOR
+}
+
 class HeroEquipment
 {
 	items = null;
@@ -45,12 +53,4 @@ class Item
 		isEquipped = _isEquipped
 		type = _type;
 	}
-}
-
-enum ItemType
-{
-	IT_OTHER,
-	IT_MELLE,
-	IT_DISTANCE,
-	IT_ARMOR
 }
