@@ -1,6 +1,5 @@
-dofile("server-scripts\\AIOScripts\\PlayerParameters.nut");
-dofile("server-scripts\\AIOScripts\\HeroAttributes.nut");
-dofile("server-scripts\\AIOScripts\\HeroEquipment.nut");
+dofile("Multiplayer\\Script\\AIOScripts\\HeroAttributes.nut");
+dofile("Multiplayer\\Script\\AIOScripts\\HeroEquipment.nut");
 
 enum GameBeziTeams
 {
@@ -12,6 +11,9 @@ enum GameBeziPackets
 {
 	GBP_EQFORSOLDIER = 1001,
 	GBP_EQFORBEZI = 1002,
+	GBP_ATRFORSOLDIER = 1003,
+	GBP_ATRFORBEZI = 1004,
+	GBP_IDOFBEZI = 1005,
 }
 
 enum GameBeziFuncs
@@ -40,7 +42,7 @@ class GameBezimienny
 		events ={};
 	}
 
-	function OnInit()
+	function OnGameStart(tableOfParams)
 	{
 		system ={
 			state = GameState.OFF,
@@ -130,6 +132,37 @@ class GameBezimienny
 			}
 		}
 	}
+
+	function onRespawn()
+	{
+		LoadHero();
+	}
+	
+	function LoadHero()
+	{
+		if(system.areYouBezi)
+		{
+			beziEq.EquipHero();
+			beziAtr.UpdateHero();
+		}
+		else
+		{
+			soldierEq.EquipHero();
+			soldierAtr.UpdateHero();
+		}
+	}
+	
+	function GameStart()
+	{
+		eventsPacket + onPacket;
+		eventsRespawn + onRespawn;
+	}
+	
+	function GameEnd()
+	{
+	
+	}
+	
 }
 
 

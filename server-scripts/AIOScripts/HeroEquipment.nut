@@ -1,3 +1,5 @@
+print("LOAD: HERO EQUIPMENT");
+
 class HeroEquipment
 {
 	items = null;
@@ -6,9 +8,9 @@ class HeroEquipment
 		items = [];
 	}	
 	
-	function Add(name, ammount = 1, isEquipped = 0)
+	function Add(name, amount = 1, isEquipped = 0, type = 0)
 	{
-		local newItem = Item(name, ammount, isEquipped);
+		local newItem = Item(name, amount, isEquipped, type);
 		items.push(newItem);
 	}
 	
@@ -16,19 +18,39 @@ class HeroEquipment
 	{
 		items.clear();
 	}
+	
+	function _tostring()
+	{
+		local text = "";
+		foreach(item in items)
+		{
+			text = format("%s %s %d %d", text, item.name,
+							item.amount, item.isEquipped);
+		}
+		return text;
+	}
 }
 
 class Item
 {
 	name = null;
-	ammount = null;
+	amount = null;
 	isEquipped = null;
+	type = null;
 	
-	constructor(_name, _ammount = 1, _isEquipped = 0)
+	constructor(_name, _amount = 1, _isEquipped = 0, _type = 0)
 	{
 		name = _name;
-		ammount = _ammount
+		amount = _amount
 		isEquipped = _isEquipped
+		type = _type;
 	}
 }
 
+enum ItemType
+{
+	IT_OTHER,
+	IT_MELLE,
+	IT_DISTANCE,
+	IT_ARMOR
+}

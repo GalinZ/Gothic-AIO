@@ -1,9 +1,11 @@
+print("LOAD: HERO ATTRIBUTES");
+
 class HeroAttributes
 {
-	str = null;
-	dex = null;
 	hp = null;
 	mp = null;
+	str = null;
+	dex = null;
 	h1 = null;
 	h2 = null;
 	bow = null;
@@ -12,7 +14,6 @@ class HeroAttributes
 	protS = null;
 	protO = null;
 	protA = null;
-	protF = null;
 	protM = null;
 	
 	constructor(_hp = 100, _mp = 0, _str = 0, _dex = 0,
@@ -33,4 +34,13 @@ class HeroAttributes
 		protA = _protA;
 		protM = _protM;
 	}	
+	
+	function _tostring()
+	{
+		return format("%d %d %d %d %d %d %d %d %d %d %d %d %d",
+						str, dex, hp, mp,
+						h1, h2,	bow, cbow, mlvl,
+						protS, protO, protA, protM);
+	}
 }
+

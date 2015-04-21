@@ -1,5 +1,7 @@
+print("LOAD: PLAYER PARAMETERS");
+
 class PlayerParameters
-{
+{	
 	id = null;
 	name = null;
 	points = null;
@@ -12,7 +14,6 @@ class PlayerParameters
 		points = 0;
 		team = -1;
 	}
-	
 	function SetPoints(value, param)
 	{
 		if(param == "+")

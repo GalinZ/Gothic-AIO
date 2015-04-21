@@ -1,3 +1,5 @@
+print("LOAD: EVENT HANDLER");
+
 class EventHandler
 {
 	listOfFunc = null;
@@ -18,8 +20,6 @@ class EventHandler
 		
 		listOfFunc.push(func);
 	}
-	
-	
 	
 	function Remove(func)
 	{

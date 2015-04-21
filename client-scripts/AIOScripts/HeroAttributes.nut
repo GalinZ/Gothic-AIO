@@ -12,7 +12,6 @@ class HeroAttributes
 	protS = null;
 	protO = null;
 	protA = null;
-	protF = null;
 	protM = null;
 	
 	constructor(_hp = 100, _mp = 0, _str = 0, _dex = 0,
@@ -32,5 +31,23 @@ class HeroAttributes
 		protO = _protO;
 		protA = _protA;
 		protM = _protM;
-	}	
+	}
+	
+	function UpdateHero()
+	{
+		setMaxHealth(hp);
+		setHealth(hp);
+		setMaxMana(mp);
+		setMana(mp);
+		setDexterity(dex);
+		setStrength(str);
+		//1h
+		//2h
+		//boW
+		//cbow
+		//protS
+		//protO
+		//protA
+		//protM
+	}
 }

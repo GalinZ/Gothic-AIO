@@ -1,26 +1,32 @@
+print("");
+print("##################");
+print("# LOADING  START #");
+print("##################");
+print("");
+
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
 dofile("server-scripts\\AIOScripts\\GameSystem.nut");
-dofile("server-scripts\\AIOGames\\Bezimienny.nut");
 
-local game = ::GameSystem();
+eventsStart <- EventHandler();
+eventsEnd <- EventHandler();
+eventsTick <- EventHandler();
+eventsPacket <- EventHandler();
 
-local eventsInit = ::EventHandler();
-local eventsTick = ::EventHandler();
-local eventsPacket = ::EventHandler();
+eventsJoin <- EventHandler();
+eventsDisconect <- EventHandler();
+eventsHit <- EventHandler();
+eventsDie <- EventHandler();
+eventsRespawn <- EventHandler();
+eventsStandUp <- EventHandler();
+eventsUnconscious <- EventHandler();
+eventsTake <- EventHandler();
+eventsDrop <- EventHandler();
 
-local eventsJoin = ::EventHandler();
-local eventsDisconect = ::EventHandler();
-local eventsHit = ::EventHandler();
-local eventsDie = ::EventHandler();
-local eventsRespawn = ::EventHandler();
-local eventsUnconscious = ::EventHandler();
-local eventsStandUp = ::EventHandler();
-local eventsTake = ::EventHandler();
-local eventsDrop = ::EventHandler();
+eventsCommand <- EventHandler();
+eventsAdminCmd <- EventHandler();
+eventsMessage <- EventHandler();
 
-local eventsCommand = ::EventHandler();
-local eventsAdminCmd = ::EventHandler();
-local eventsMessage = ::EventHandler();
+game <- GameSystem();1
 
 function onPacket(pid, data)
 {
@@ -87,6 +93,11 @@ function onMessage(pid, message)
 
 function onInit()
 {
-
+	game.LoadGame("Bezimienny");
 }
 
+print("");
+print("##################");
+print("#LOADING COMPLETE#");
+print("##################");
+print("");

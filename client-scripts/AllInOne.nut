@@ -1,17 +1,21 @@
 dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
+dofile("Multiplayer\\Script\\AIOScripts\\GameSystem.nut");
 
-local eventsInit = ::EventHandler();
-local eventsRender = ::EventHandler();
-local eventsPacket = ::EventHandler();
-local eventsHit = ::EventHandler();
-local eventsDie = ::EventHandler();
-local eventsRespawn = ::EventHandler();
-local eventsStandUp = ::EventHandler();
-local eventsUnconscious = ::EventHandler();
-local eventsCommand = ::EventHandler();
-local eventsClick = ::EventHandler();
-local eventsKey = ::EventHandler();
+eventsStart <- EventHandler();
+eventsEnd <- EventHandler();
 
+eventsRender <- EventHandler();
+eventsPacket <- EventHandler();
+eventsHit <- EventHandler();
+eventsDie <- EventHandler();
+eventsRespawn <- EventHandler();
+eventsStandUp <- EventHandler();
+eventsUnconscious <- EventHandler();
+eventsCommand <- EventHandler();
+eventsClick <- EventHandler();
+eventsKey <- EventHandler();
+
+game <- GameSystem();
 
 function onRender()
 {
@@ -55,11 +59,6 @@ function onClick()
 function onKey(key)
 {
 	eventsKey.Call(key)
-}
-
-class GameSystem
-{
-	
 }
 
 function onInit()
