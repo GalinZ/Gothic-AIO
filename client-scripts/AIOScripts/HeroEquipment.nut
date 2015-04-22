@@ -1,3 +1,13 @@
+
+
+enum ItemType
+{
+	OTHER,
+	MELLE,
+	DISTANCE,
+	ARMOR
+}
+
 class HeroEquipment
 {
 	items = null;
@@ -22,8 +32,8 @@ class HeroEquipment
 		local text = "";
 		foreach(item in items)
 		{
-			text = format("%s %s %d %d", text, item.name,
-							item.amount, item.isEquipped);
+			text = format("%s %s %d %d %d", text, item.name, item.amount,
+											item.isEquipped, item.type);
 		}
 		return text;
 	}
@@ -37,13 +47,13 @@ class HeroEquipment
 			{
 				switch(item.type)
 				{
-				case IT_MELLE:
+				case ItemType.MELLE:
 					equipMeleeWeapon(item.name);
 					break;
-				case IT_DISTANCE:
+				case ItemType.DISTANCE:
 					equipRangedWeapon(item.name);
 					break;
-				case IT_ARMOR:
+				case ItemType.ARMOR:
 					equipArmor(item.name);
 					break;
 				default:
@@ -62,14 +72,28 @@ class HeroEquipment
 			}
 		}
 	}
-}
 
-enum ItemType
-{
-	IT_OTHER,
-	IT_MELLE,
-	IT_DISTANCE,
-	IT_ARMOR
+	function covertString(params)
+	{	
+		do
+		{
+			local item = sscanf("sddds", params);
+			if(item)
+			{
+				Add(item[0], item[1], item[2], item[3]);
+				params = item[4];
+			}
+			else
+			{
+				local item = sscanf("sddd", params);
+				if(item)
+				{
+					system.beziEq.Add(item[0], item[1], item[2], item[3]);
+				}
+				break;
+			}
+		}while(true)
+	}
 }
 
 class Item
@@ -79,7 +103,7 @@ class Item
 	isEquipped = null;
 	type = null;
 	
-	constructor(_name, _amount = 1, _isEquipped = 0, _type = ItemType.IT_OTHER)
+	constructor(_name, _amount = 1, _isEquipped = 0, _type = ItemType.OTHER)
 	{
 		name = _name;
 		amount = _amount
@@ -87,5 +111,3 @@ class Item
 		type = _type;
 	}
 }
-
-

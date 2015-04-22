@@ -1,4 +1,5 @@
 dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
+dofile("Multiplayer\\Script\\AIOScripts\\AdditionalFunc.nut");
 dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
 
 eventsStart <- EventHandler();
@@ -15,7 +16,11 @@ eventsCommand <- EventHandler();
 eventsClick <- EventHandler();
 eventsKey <- EventHandler();
 
+eventsTimersEnd <- EventHandler();
+eventsUpdate <- EventHandler();
+
 game <- GameSystem();
+allTimers <-[];
 
 function onRender()
 {
@@ -23,6 +28,7 @@ function onRender()
 }
 function onPacket(data)
 {
+	game.onPacket(data);
 	eventsPacket.Call(data);
 }
 //PLAYER
@@ -61,7 +67,19 @@ function onKey(key)
 	eventsKey.Call(key)
 }
 
+//Timer
+function onUpdate() // 100ms
+{
+	eventsTimersEnd.Call();
+}
+function onTimerEnd(obiect)
+{
+	eventsTimersEnd.Call(obiect);
+}
+
 function onInit()
 {
-
+	setTimer(onUpdate, 100, true);
 };
+
+

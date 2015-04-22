@@ -1,6 +1,23 @@
 print("LOAD: GAME SYSTEM");
-
 dofile("server-scripts\\AIOGames\\ListOfGames.nut");
+
+enum GameState
+{
+	OFF,
+	INIT,
+	WAIT,
+	STARTED,
+	ENDED,
+}
+
+enum GameSystemPacket
+{
+	SWITCH_GAME = 101,
+	INIT_GAME = 102,
+	START_GAME = 103,
+	END_GAME = 104, 
+	MY_DATA = 105,
+}
 
 class GameSystem
 {
@@ -42,15 +59,17 @@ class GameSystem
 		{
 			event.Clear();
 		}
-	}	
+	}
 	
 	function onCommand(pid, command, params)
 	{
 		switch(command)
 		{
 		case "start":
+			listOfGame[currGame].GameInitPlayers();
 			break;
 		case "end":
+			listOfGame[currGame].OnEnd();
 			break;
 		default: break;
 		}
@@ -71,11 +90,3 @@ class GameSystem
 	}
 }
 
-enum GameState
-{
-	GS_OFF,
-	GS_INIT,
-	GS_WAIT,
-	GS_STARTED,
-	GS_ENDED,
-}

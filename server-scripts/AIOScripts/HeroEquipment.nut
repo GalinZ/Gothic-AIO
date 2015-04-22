@@ -2,10 +2,10 @@ print("LOAD: HERO EQUIPMENT");
 
 enum ItemType
 {
-	IT_OTHER,
-	IT_MELLE,
-	IT_DISTANCE,
-	IT_ARMOR
+	OTHER,
+	MELLE,
+	DISTANCE,
+	ARMOR
 }
 
 class HeroEquipment
@@ -32,8 +32,8 @@ class HeroEquipment
 		local text = "";
 		foreach(item in items)
 		{
-			text = format("%s %s %d %d", text, item.name,
-							item.amount, item.isEquipped);
+			text = format("%s%s %d %d %d ", text, item.name, item.amount,
+											item.isEquipped, item.type);
 		}
 		return text;
 	}
@@ -46,7 +46,7 @@ class Item
 	isEquipped = null;
 	type = null;
 	
-	constructor(_name, _amount = 1, _isEquipped = 0, _type = 0)
+	constructor(_name, _amount = 1, _isEquipped = 0, _type = ItemType.OTHER)
 	{
 		name = _name;
 		amount = _amount

@@ -7,13 +7,14 @@ class PlayerParameters
 	points = null;
 	team = null;
 	
-	constructor(id)
+	constructor(_id)
 	{
-		id = id;
-		name = getPlayerName(id);
+		id = _id;
+		name = getPlayerName(_id);
 		points = 0;
 		team = -1;
 	}
+	
 	function SetPoints(value, param)
 	{
 		if(param == "+")

@@ -5,7 +5,8 @@ print("LOAD: LIST OF GAMES");
 dofile("server-scripts\\AIOGames\\Includes\\Bezimienny.nut");
 dofile("server-scripts\\AIOGames\\Bezimienny.nut");
 
-listOfGame  <-{
+listOfGame  <-
+{
 	Bezimienny = GameBezimienny(),
 }
 

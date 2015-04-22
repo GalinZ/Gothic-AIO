@@ -1,9 +1,9 @@
 class HeroAttributes
 {
-	str = null;
-	dex = null;
 	hp = null;
 	mp = null;
+	str = null;
+	dex = null;
 	h1 = null;
 	h2 = null;
 	bow = null;
@@ -31,7 +31,7 @@ class HeroAttributes
 		protO = _protO;
 		protA = _protA;
 		protM = _protM;
-	}
+	}	
 	
 	function UpdateHero()
 	{
@@ -50,4 +50,7 @@ class HeroAttributes
 		//protA
 		//protM
 	}
+
+	
 }
+

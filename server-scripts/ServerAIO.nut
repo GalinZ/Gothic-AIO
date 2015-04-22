@@ -7,6 +7,7 @@ print("");
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
 dofile("server-scripts\\AIOGames\\GameSystem.nut");
 
+
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
 eventsTick <- EventHandler();
@@ -39,6 +40,8 @@ function onTick()
 //PLAYER
 function onJoin(id)
 {
+	sendPacket(1, id, format("105 %d %d", id, getMaxSlots()));
+	//sendPacket(id, format("%d %d %d", GameSystemPacket.MY_DATA, id, getMaxSlots()));
 	game.AddPlayer(id);
 	eventsJoin.Call(id);
 }
@@ -80,6 +83,7 @@ function onDrop(jakies_zmienne)
 //CHAT
 function onCommand(pid, command, params)
 {
+	game.onCommand(pid, command, params);
 	eventsCommand.Call(pid, command, params);
 }
 function onAdminCommand(pid, command)
@@ -93,7 +97,43 @@ function onMessage(pid, message)
 
 function onInit()
 {
-	game.LoadGame("Bezimienny");
+	game.LoadGame("Bezimienny");		
+}
+
+function ConvertName(text, fromChar, toChar)
+{
+	local i = 0;
+	local last = 0;
+	local newText = "";
+	do
+	{
+		i = text.find(fromChar, i + 1);
+		if(i)
+		{
+			if(newText == "")
+			{
+				newText += text.slice(last, i);
+			}
+			else
+			{
+				newText += toChar + text.slice(last, i);
+			}
+			last = i + 1;
+		}
+		else
+		{
+			if(newText == "")
+			{
+				newText += text.slice(last);
+			}
+			else
+			{
+				newText += toChar + text.slice(last);
+			}
+		}
+	}while(i)
+
+	return newText;
 }
 
 print("");
@@ -101,3 +141,6 @@ print("##################");
 print("#LOADING COMPLETE#");
 print("##################");
 print("");
+
+
+

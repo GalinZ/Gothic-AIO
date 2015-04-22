@@ -38,7 +38,7 @@ class HeroAttributes
 	function _tostring()
 	{
 		return format("%d %d %d %d %d %d %d %d %d %d %d %d %d",
-						str, dex, hp, mp,
+						hp, mp, str, dex, 
 						h1, h2,	bow, cbow, mlvl,
 						protS, protO, protA, protM);
 	}

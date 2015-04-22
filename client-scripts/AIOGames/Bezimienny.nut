@@ -1,28 +1,29 @@
-dofile("Multiplayer\\Script\\AIOScripts\\HeroAttributes.nut");
-dofile("Multiplayer\\Script\\AIOScripts\\HeroEquipment.nut");
 
 enum GameBeziTeams
 {
-	GBT_SOLDIERS,
-	GBT_BEZI
+	SOLDIERS,
+	BEZI
 }
 
 enum GameBeziPackets
 {
-	GBP_EQFORSOLDIER = 1001,
-	GBP_EQFORBEZI = 1002,
-	GBP_ATRFORSOLDIER = 1003,
-	GBP_ATRFORBEZI = 1004,
-	GBP_IDOFBEZI = 1005,
+	EQFORSOLDIER = 1001,
+	EQFORBEZI = 1002,
+	ATRFORSOLDIER = 1003,
+	ATRFORBEZI = 1004,
+	IDOFBEZI = 1005,
+	UPDATESCORE = 1006,
+	STARTGAME = 1007,
+	SENDTIME = 1008,
 }
 
 enum GameBeziFuncs
 {
-	GBF_BEZI_KILL_SOLDIER,
-	GBF_SOLDIER_KILL_BEZI,
-	GBF_SOLDER_HIT_BEZI
+	BEZI_KILL_SOLDIER,
+	SOLDIER_KILL_BEZI,
+	SOLDIER_HIT_BEZI
 }
-	
+
 class GameBezimienny
 {
 	draws = null;
@@ -33,81 +34,42 @@ class GameBezimienny
 	events = null;
 	
 	constructor()
-	{	
+	{
 		draws ={};
 		textures ={};
 		timers ={};
 		vobs ={};
-		system ={};
+		system ={	state = GameState.OFF};
 		events ={};
 	}
-
-	function OnGameStart(tableOfParams)
+	
+	//I N I T 
+	function onInit()
 	{
 		system ={
-			state = GameState.OFF,
-			areYouBezi = false,
+			state = GameState.WAIT,
+			bezimiennyID = -1,
 			gameTime = -1,
 			
 			soldierEq = HeroEquipment(),						
 			beziEq = HeroEquipment(),
-
+			soldierAtr = null,
+			beziAtr = null,
 		}
-		system.state = GameState.WAIT;
-		system.gameTime = delayTime;
-	} 
-	
-	function onPacket(data)
-	{
-		local packet = sscanf("ds", data);
-		if (packet)
-		{
-			if (packet[0] == GameBeziPackets.GBP_EQFORSOLDIER)
-			{
-				GetStandardEquipment(GameBeziTeams.GBT_SOLDIERS, data);
-			}
-			else if(packet[0] == GameBeziPackets.GBP_EQFORBEZI)
-			{
-				GetStandardEquipment(GameBeziTeams.GBT_BEZI, data);
-			}
 		
-        }
-	}
-	
+		CreateScoreBoard();
+	} 
+	//W A I T ___ F O R  ___ P A R A M S
 	function GetStandardEquipment(forWho, params)
 	{
-		do
+		if(forWho == GameBeziTeams.SOLDIERS)
 		{
-			local item = sscanf("sdds", params);
-			if(item)
-			{
-				if(forWho == GameBeziTeams.GBT_SOLDIERS)
-				{
-					soldierEq.Add(item[0], item[1], item[2]);
-				}
-				else if(forWho == GameBeziTeams.GBT_BEZI)
-				{
-					beziEq.Add(item[0], item[1], item[2]);
-				}
-				params = item[3];
-			}
-			else
-			{
-				local item = sscanf("sdd", params);
-				if(item)
-				{
-					if(forWho == GameBeziTeams.GBT_SOLDIERS)
-					{
-						system.soldierEq.Add(item[0], item[1], item[2]);
-					}
-					else if(forWho == GameBeziTeams.GBT_BEZI)
-					{
-						system.beziEq.Add(item[0], item[1], item[2]);
-					}
-				}
-				break;
-			}
-		}while(true)
+			system.soldierEq.covertString(params);
+		}
+		else if(forWho == GameBeziTeams.BEZI)
+		{
+			system.beziEq.covertString(params);
+		}	
 	}
 	
 	function GetStandarHeroAttributes(forWho, params)
@@ -118,26 +80,21 @@ class GameBezimienny
 		local atr = sscanf("ddddddddddddd", params);
 		if(atr)
 		{
-			if(forWho == GameBeziTeams.GBT_SOLDIERS)
+			if(forWho == GameBeziTeams.SOLDIERS)
 			{
-				soldierAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
+				system.soldierAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
 								atr[4], atr[5], atr[6], atr[7], atr[8], 
 								atr[9], atr[10], atr[11], atr[12]);
 			}
-			else if(forWho == GameBeziTeams.GBT_BEZI)
+			else if(forWho == GameBeziTeams.BEZI)
 			{
-				beziAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
+				system.beziAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
 							atr[4], atr[5], atr[6], atr[7], atr[8], 
-							atr[9], atr[10], atr[11], atr[12]);
+							atr[9], atr[10], atr[11], atr[12]);				
 			}
 		}
 	}
 
-	function onRespawn()
-	{
-		LoadHero();
-	}
-	
 	function LoadHero()
 	{
 		if(system.areYouBezi)
@@ -151,11 +108,26 @@ class GameBezimienny
 			soldierAtr.UpdateHero();
 		}
 	}
-	
+
+	function CreateScoreBoard()
+	{
+		addMessage(255,255,255, "CreateBOard");
+		draws.scoreBoard <- [];
+		for(local i=0; i<20 ; i++)
+		{
+			local newDraw = createDraw("", "FONT_OLD_10_WHITE_HI.TGA",
+					5500, 100 + i * PxToPoint(20,"y"), 255, 255, 255);
+			draws.scoreBoard.push(newDraw);
+			setDrawVisible(newDraw, true);
+		}
+	}
+	//G A M E ___ S T A R T
 	function GameStart()
 	{
-		eventsPacket + onPacket;
-		eventsRespawn + onRespawn;
+		system.state = GameState.STARTED;
+		addMessage(255, 255, 255, "Start");
+		eventsPacket.Add("onPacket", this);
+		eventsRespawn.Add("onRespawn", this);
 	}
 	
 	function GameEnd()
@@ -163,6 +135,100 @@ class GameBezimienny
 	
 	}
 	
+	function BecomeTheBezimienny()
+	{
+		system.beziEq.EquipHero();
+		system.beziAtr.UpdateHero();
+	}
+	
+	function UpdateScore(scores)
+	{	
+		addMessage(255,255,255, "UpdateScore");
+		local index = 0;
+		do
+		{
+			local params = sscanf("dsds", scores)
+			if(params)
+			{
+				if(packet[0] == system.bezimiennyID)
+				{
+					setDrawColor(draws.scoreBoard[index], 255, 0, 0);
+				}
+				else
+				{
+					setDrawColor(draws.scoreBoard[index], 255, 255, 255);
+				}
+				setDrawText(draws.scoreBoard[index], format("%40d : %s (%d)"),params[2], ConvertName(params[1], "_", " ", params[0]));
+				index++;
+			}
+			else
+			{
+				local params = sscanf("dsd", scores)
+				if(params)
+				{
+					if(packet[0] == system.bezimiennyID)
+					{
+						setDrawColor(draws.scoreBoard[index], 255, 0, 0);
+					}
+					else
+					{
+						setDrawColor(draws.scoreBoard[index], 255, 255, 255);
+					}
+					setDrawText(draws.scoreBoard[index], format("%40d : %s (%d)"),params[2], ConvertName(params[1], "_", " ", params[0]));
+					index++;
+				}
+				break;
+			}
+		}while(true);
+		
+		for(index; index<20; index++)
+		{
+			setDrawText(draws.scoreBoard[index], "");
+		}
+	}
+	// CALLBACKS
+	function onPacket(data)
+	{
+		
+		local packet = sscanf("ds", data);
+		if (packet)
+		{
+			switch(packet[0])
+			{
+			case GameBeziPackets.EQFORSOLDIER:
+				GetStandardEquipment(GameBeziTeams.SOLDIERS, packet[1]);
+				break;
+			case GameBeziPackets.EQFORBEZI:
+				GetStandardEquipment(GameBeziTeams.BEZI, packet[1]);
+				break;
+			case GameBeziPackets.ATRFORSOLDIER:
+				GetStandarHeroAttributes(GameBeziTeams.SOLDIERS, packet[1]);
+				break;
+			case GameBeziPackets.ATRFORBEZI:
+				GetStandarHeroAttributes(GameBeziTeams.BEZI, packet[1]);
+				break;
+			case GameBeziPackets.IDOFBEZI:
+				system.bezimiennyID = packet[1].tointeger();
+				if(system.bezimiennyID == GameSystem.myId)
+				{
+					BecomeTheBezimienny();
+				}
+				break;
+			case GameBeziPackets.UPDATESCORE:
+				UpdateScore(packet[1]);
+				break;
+			case GameBeziPackets.STARTGAME:
+				GameStart();
+				break;
+			
+			}
+        }
+	}
+	
+	function onRespawn()
+	{
+		LoadHero();
+	}
+
+	
 }
-
-
