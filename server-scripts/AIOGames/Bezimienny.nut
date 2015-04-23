@@ -52,13 +52,13 @@ class GameBezimienny
 				killBezi = 100,
 			},
 			
-			soldierAtr = HeroAttributes(100, 0, 50, 50,
-									2, 2, 2, 2, 0,
+			soldierAtr = HeroAttributes(240, 0, 54, 35,
+									100, 100, 0, 100, 0,
 									0, 0, 0, 0),
 			soldierEq = HeroEquipment(),
 									
-			beziAtr = HeroAttributes(1000, 0, 100, 0,
-									2, 2, 0, 0, 0,
+			beziAtr = HeroAttributes(1000, 0, 55, 0,
+									0, 100, 0, 0, 0,
 									0, 0, 0, 0),
 			beziEq = HeroEquipment(),
 
@@ -85,12 +85,13 @@ class GameBezimienny
 		//Soldier equipment
 		system.soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.ARMOR);
 		system.soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.MELLE);
-		system.soldierEq.Add("ITRW_CROSSBOW_03", 1, 1, ItemType.DISTANCE);
+		system.soldierEq.Add("ITRW_CROSSBOW_01", 1, 1, ItemType.DISTANCE);
 		system.soldierEq.Add("ITAMBOLT", 10, 1, ItemType.OTHER);
 		
 		//Bezimienny equipment
 		system.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.ARMOR);
-		system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
+		//system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
+		system.beziEq.Add("MYTHRILKLINGE02", 1, 1, ItemType.MELLE);
 	}
 	
 	//W A I T ___ F O R ___ P L A Y E R S
@@ -99,13 +100,12 @@ class GameBezimienny
 		LoadPlayers();
 		foreach(player in system.players)
 		{
-			sendPacket(2, player.id, format("%d Bezimienny" ,GameSystemPacket.INIT_GAME));
+			sendPacket(player.id, 2, format("%d Bezimienny" ,GameSystemPacket.INIT_GAME));
 		}
 		
 		GameStartSendParameters();
-		ChooseBezimienny();
 		HookCallbackToGlobal();
-		timers.startGame <- setTimer(this["GameStart"], 3000, false);
+		timers.startGame <- setTimerClass(this, "GameStart", 3000, false);
 	}
 	
 	function LoadPlayers()
@@ -128,18 +128,18 @@ class GameBezimienny
 		{
 			foreach(pid in game.players)
 			{
-				sendPacket(1, pid, paramsAtrB);
-				sendPacket(1, pid, paramsEqB);
-				sendPacket(1, pid, paramsAtrS);
-				sendPacket(1, pid, paramsEqS);
+				sendPacket(pid, 1, paramsAtrB);
+				sendPacket(pid, 1, paramsEqB);
+				sendPacket(pid, 1, paramsAtrS);
+				sendPacket(pid, 1, paramsEqS);
 			}
 		}
 		else
 		{
-			sendPacket(1, player, paramsAtrB);
-			sendPacket(1, player, paramsEqB);
-			sendPacket(1, player, paramsAtrS);
-			sendPacket(1, player, paramsEqS);
+			sendPacket(player, 1, paramsAtrB);
+			sendPacket(player, 1, paramsEqB);
+			sendPacket(player, 1, paramsAtrS);
+			sendPacket(player, 1, paramsEqS);
 		}
 	}
 	
@@ -153,17 +153,18 @@ class GameBezimienny
 			{
 				system.soldiers.push(system.players[i].id);
 			}
-			sendPacket(1, system.players[i].id, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
+			sendPacket(system.players[i].id, 1, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
 		}
 	}
 	
 	//G A M E ___ S T A R T 
 	function GameStart()
 	{
-		print("start Game");
 		HookCallbackToGlobal();
-		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME));
-		timers.scoreboard = setTimer(this.SendScroreBoard, 3000, true);
+		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME), 2);
+		timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
+		ChooseBezimienny();
+		SendScroreBoard();
 	}
 	
 	function HookCallbackToGlobal()
@@ -214,15 +215,14 @@ class GameBezimienny
 			packet += format(" %d %s %d", player.id, ConvertName(player.name, " ", "_"), player.points);
 		}
 		
-		print("Score board " + packet);
 		SendPacketToAll(packet)
 	}
 
-	function SendPacketToAll(packet)
+	function SendPacketToAll(packet, prior = 1)
 	{
 		foreach(player in system.players)
 		{
-			sendPacket(1, player.id, packet);
+			sendPacket(player.id, prior, packet);
 		}
 	}
 	//C A L L B A C K S
@@ -284,7 +284,7 @@ class GameBezimienny
 	{
 		GameStartSendParameters(id);
 		system.soldiers.push(id);
-		sendPacket(2, id, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
+		sendPacket(id, 2, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
 	}
 	
 	function JoinAfterStart(id)

@@ -97,7 +97,7 @@ class GameBezimienny
 
 	function LoadHero()
 	{
-		if(system.areYouBezi)
+		if(system.bezimiennyID == game.myId)
 		{
 			beziEq.EquipHero();
 			beziAtr.UpdateHero();
@@ -111,12 +111,11 @@ class GameBezimienny
 
 	function CreateScoreBoard()
 	{
-		addMessage(255,255,255, "CreateBOard");
 		draws.scoreBoard <- [];
 		for(local i=0; i<20 ; i++)
 		{
 			local newDraw = createDraw("", "FONT_OLD_10_WHITE_HI.TGA",
-					5500, 100 + i * PxToPoint(20,"y"), 255, 255, 255);
+					6500, 100 + i * PxToPoint(20,"y"), 255, 255, 255);
 			draws.scoreBoard.push(newDraw);
 			setDrawVisible(newDraw, true);
 		}
@@ -125,9 +124,11 @@ class GameBezimienny
 	function GameStart()
 	{
 		system.state = GameState.STARTED;
-		addMessage(255, 255, 255, "Start");
 		eventsPacket.Add("onPacket", this);
 		eventsRespawn.Add("onRespawn", this);
+		
+		system.soldierAtr.UpdateHero();
+		system.soldierEq.EquipHero();
 	}
 	
 	function GameEnd()
@@ -137,20 +138,19 @@ class GameBezimienny
 	
 	function BecomeTheBezimienny()
 	{
-		system.beziEq.EquipHero();
 		system.beziAtr.UpdateHero();
+		system.beziEq.EquipHero();
 	}
 	
 	function UpdateScore(scores)
 	{	
-		addMessage(255,255,255, "UpdateScore");
 		local index = 0;
 		do
 		{
 			local params = sscanf("dsds", scores)
 			if(params)
 			{
-				if(packet[0] == system.bezimiennyID)
+				if(params[0] == system.bezimiennyID)
 				{
 					setDrawColor(draws.scoreBoard[index], 255, 0, 0);
 				}
@@ -158,15 +158,16 @@ class GameBezimienny
 				{
 					setDrawColor(draws.scoreBoard[index], 255, 255, 255);
 				}
-				setDrawText(draws.scoreBoard[index], format("%40d : %s (%d)"),params[2], ConvertName(params[1], "_", " ", params[0]));
+				setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)", params[2], ConvertName(params[1], "_", " "), params[0]));
 				index++;
+				scores = params[3];
 			}
 			else
 			{
 				local params = sscanf("dsd", scores)
 				if(params)
 				{
-					if(packet[0] == system.bezimiennyID)
+					if(params[0] == system.bezimiennyID)
 					{
 						setDrawColor(draws.scoreBoard[index], 255, 0, 0);
 					}
@@ -174,12 +175,12 @@ class GameBezimienny
 					{
 						setDrawColor(draws.scoreBoard[index], 255, 255, 255);
 					}
-					setDrawText(draws.scoreBoard[index], format("%40d : %s (%d)"),params[2], ConvertName(params[1], "_", " ", params[0]));
+					setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)",params[2], ConvertName(params[1], "_", " "), params[0]));
 					index++;
 				}
 				break;
 			}
-		}while(true);
+		}while(true && index < 20);
 		
 		for(index; index<20; index++)
 		{
@@ -209,7 +210,7 @@ class GameBezimienny
 				break;
 			case GameBeziPackets.IDOFBEZI:
 				system.bezimiennyID = packet[1].tointeger();
-				if(system.bezimiennyID == GameSystem.myId)
+				if(system.bezimiennyID == game.myId)
 				{
 					BecomeTheBezimienny();
 				}
@@ -227,6 +228,7 @@ class GameBezimienny
 	
 	function onRespawn()
 	{
+		completeHeal();
 		LoadHero();
 	}
 

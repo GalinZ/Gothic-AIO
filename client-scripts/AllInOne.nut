@@ -1,5 +1,5 @@
-dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
 dofile("Multiplayer\\Script\\AIOScripts\\AdditionalFunc.nut");
+dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
 dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
 
 eventsStart <- EventHandler();
@@ -72,14 +72,26 @@ function onUpdate() // 100ms
 {
 	eventsTimersEnd.Call();
 }
-function onTimerEnd(obiect)
+function onTimerEnd(object)
 {
-	eventsTimersEnd.Call(obiect);
+	eventsTimersEnd.Call(object);
 }
+function classTimer(obiect)
+{
+	if(object.params == null)
+	{
+		object.inst[object.func]();
+	}
+	else
+	{
+		object.inst[object.func](object.params);
+	}
+}
+
 
 function onInit()
 {
 	setTimer(onUpdate, 100, true);
-};
 
+};
 

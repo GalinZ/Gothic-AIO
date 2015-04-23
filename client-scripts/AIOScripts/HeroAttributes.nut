@@ -41,10 +41,10 @@ class HeroAttributes
 		setMana(mp);
 		setDexterity(dex);
 		setStrength(str);
-		//1h
-		//2h
-		//boW
-		//cbow
+		setWeaponSkill(1, h1);
+		setWeaponSkill(2, h2);
+		setWeaponSkill(3, bow);
+		setWeaponSkill(4, cbow);
 		//protS
 		//protO
 		//protA

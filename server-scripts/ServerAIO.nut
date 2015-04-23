@@ -4,6 +4,7 @@ print("# LOADING  START #");
 print("##################");
 print("");
 
+dofile("server-scripts\\AIOScripts\\AdditionalFunc.nut");
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
 dofile("server-scripts\\AIOGames\\GameSystem.nut");
 
@@ -40,7 +41,7 @@ function onTick()
 //PLAYER
 function onJoin(id)
 {
-	sendPacket(1, id, format("105 %d %d", id, getMaxSlots()));
+	sendPacket(id, 1, format("105 %d %d", id, getMaxSlots()));
 	//sendPacket(id, format("%d %d %d", GameSystemPacket.MY_DATA, id, getMaxSlots()));
 	game.AddPlayer(id);
 	eventsJoin.Call(id);
@@ -97,7 +98,8 @@ function onMessage(pid, message)
 
 function onInit()
 {
-	game.LoadGame("Bezimienny");		
+	game.LoadGame("Bezimienny");	
+	//local bde = ABC();
 }
 
 function ConvertName(text, fromChar, toChar)
@@ -141,6 +143,3 @@ print("##################");
 print("#LOADING COMPLETE#");
 print("##################");
 print("");
-
-
-
