@@ -7,7 +7,6 @@ enum TimerModes
 class Timer
 {
 	mode = null;
-	draw = null;
 	time = null;
 	lastTick = null;
 	isStarted = null;
@@ -85,7 +84,6 @@ class Timer
 			}
 			lastTick = tick;
 			
-			UpdateDraw();
 		}
 	}
 	
@@ -93,32 +91,5 @@ class Timer
 	{
 		onTimerEnd(this);
 	}	
-
-	function ConnectDraw(x, y, font, r, g, b, visible = true)
-	{
-		local ms = time % 1000 / 100;
-		local s  = time / 1000 % 60;
-		local m  = time / 1000 / 60;
-		local text = format("%02d:%02d:%d", m, s, ms);
-		draw = createDraw(text, font, x, y, r, g, b);
-		setDrawVisible(draw, visible);
-	}
-	
-	function UpdateDraw()
-	{
-		if(draw != null)
-		{
-			local ms = time % 1000 / 100;
-			local s  = time / 1000 % 60;
-			local m  = time / 1000 / 60;
-			local text = format("%02d:%02d:%d", m, s, ms);
-			setDrawText(draw, text);
-		}
-	}
-	
-	function GetDraw()
-	{
-		return draw;
-	}
 }
 

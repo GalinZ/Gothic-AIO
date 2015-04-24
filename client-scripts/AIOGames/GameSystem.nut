@@ -41,6 +41,7 @@ class GameSystem
 			event.Clear();
 		}
 	}
+
 	function LoadGame(name)
 	{
 		if(name in listOfGame)

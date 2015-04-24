@@ -91,3 +91,22 @@ function classTimer(object)
 		object.inst[object.func](object.params);
 	}
 }
+
+function random(value1, value2 = null)
+{
+	if(value2 == null)
+	{
+		if(value1 == 0)
+		{
+			return 0;
+		}
+		else
+		{
+			return(rand()%value1);
+		}
+	}
+	else
+	{
+		return value1 + (rand()%(value2-value1 + 1));
+	}
+}

@@ -28,6 +28,9 @@ eventsCommand <- EventHandler();
 eventsAdminCmd <- EventHandler();
 eventsMessage <- EventHandler();
 
+eventsUpdate <- EventHandler();
+eventsTimersEnd <- EventHandler();
+
 game <- GameSystem();
 
 function onPacket(pid, data)
@@ -95,11 +98,21 @@ function onMessage(pid, message)
 {
 	eventsMessage.Call(pid, message);
 }
+//Timers
+function onUpdate() // 100ms
+{
+	rand();
+	eventsUpdate.Call();
+}
+function onTimerEnd(object)
+{
+	eventsTimersEnd.Call(object);
+}
 
 function onInit()
 {
-	game.LoadGame("Bezimienny");	
-	//local bde = ABC();
+	setTimer(onUpdate, 100, true);
+	game.LoadGame("Bezimienny");
 }
 
 function ConvertName(text, fromChar, toChar)
@@ -143,3 +156,5 @@ print("##################");
 print("#LOADING COMPLETE#");
 print("##################");
 print("");
+
+

@@ -8,7 +8,8 @@ enum GameBeziPackets
 	ATRFORBEZI = 1004,
 	IDOFBEZI = 1005,
 	UPDATESCORE = 1006,
-	STARTGAME = 1007
+	STARTGAME = 1007,
+	SENDTIME = 1008
 }
 
 enum GameBeziFuncs
@@ -39,10 +40,12 @@ class GameBezimienny
 			players	= [],
 			soldiers = [],
 			bezimienny = -1,
+			minPlayers = 3,
 			
-			gameTime = -1,
-			roundTime = 5*60,
-			delayTime = 1*60,
+			gameTime = Timer(TimerModes.TOZERO),
+			//roundTime = 5*60*10, 
+			roundTime = 30*10, 
+			delayTime = 1*60*10, 
 			points ={
 				beziSuicide = -500,
 				teamKill = -150,
@@ -52,7 +55,7 @@ class GameBezimienny
 				killBezi = 100,
 			},
 			
-			soldierAtr = HeroAttributes(240, 0, 54, 35,
+			soldierAtr = HeroAttributes(360, 0, 54, 35,
 									100, 100, 0, 100, 0,
 									0, 0, 0, 0),
 			soldierEq = HeroEquipment(),
@@ -61,7 +64,7 @@ class GameBezimienny
 									0, 100, 0, 0, 0,
 									0, 0, 0, 0),
 			beziEq = HeroEquipment(),
-
+	
 		}
 		StandardEquipment();
 		StandardFunctions();
@@ -90,21 +93,25 @@ class GameBezimienny
 		
 		//Bezimienny equipment
 		system.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.ARMOR);
-		//system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
-		system.beziEq.Add("MYTHRILKLINGE02", 1, 1, ItemType.MELLE);
+		system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
+	}
+	
+	function SendPacketToAll(packet, prior = 1)
+	{
+		foreach(player in system.players)
+		{
+			sendPacket(player.id, prior, packet);
+		}
 	}
 	
 	//W A I T ___ F O R ___ P L A Y E R S
 	function GameInitPlayers()
 	{
 		LoadPlayers();
-		foreach(player in system.players)
-		{
-			sendPacket(player.id, 2, format("%d Bezimienny" ,GameSystemPacket.INIT_GAME));
-		}
-		
+		system.gameTime.SetTime(system.roundTime * 100);
+		SendPacketToAll(format("%d Bezimienny" ,GameSystemPacket.INIT_GAME), 2);
+		SendPacketToAll(format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()), 2);
 		GameStartSendParameters();
-		HookCallbackToGlobal();
 		timers.startGame <- setTimerClass(this, "GameStart", 3000, false);
 	}
 	
@@ -145,35 +152,32 @@ class GameBezimienny
 	
 	function ChooseBezimienny()
 	{
-		local nextBezi = 0 //rand(0, system.players.len() - 1);
-		system.bezimienny = system.players[nextBezi].id;
-		for(local i= 0; i < system.players.len(); i++)
+		local newBezi = -1;
+		do
 		{
-			if(i != nextBezi)
-			{
-				system.soldiers.push(system.players[i].id);
-			}
-			sendPacket(system.players[i].id, 1, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
-		}
+			if(system.players.len() > 0){	break;}
+			newBezi = system.players[random(system.players.len())].id;
+		}while(newBezi == system.bezimienny && system.players.len() > 1)
+		SetNewBezimienny(newBezi);
+	}
+	
+	function SetNewBezimienny(id)
+	{
+		system.bezimienny = id;
+		SendPacketToAll(format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
 	}
 	
 	//G A M E ___ S T A R T 
 	function GameStart()
 	{
-		HookCallbackToGlobal();
+		HookCallbacks();
+		system.gameTime.Start();
 		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME), 2);
 		timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
 		ChooseBezimienny();
 		SendScroreBoard();
 	}
 	
-	function HookCallbackToGlobal()
-	{
-		eventsJoin.Add("onJoin", this);
-		eventsDisconect.Add("onDisconnect", this);
-		eventsHit.Add("onHit", this);
-		eventsDie.Add("onDie", this);
-	}
 	//G A M E ___ L O G I C
 	function BeziKillSoldier(beziID, soldierID)
 	{
@@ -198,7 +202,7 @@ class GameBezimienny
 	{
 		for(local i=0; i<system.players.len(); i++)
 		{
-			if(system.players[i].id = id)
+			if(system.players[i].id == id)
 			{
 				return i;
 			}
@@ -218,14 +222,16 @@ class GameBezimienny
 		SendPacketToAll(packet)
 	}
 
-	function SendPacketToAll(packet, prior = 1)
-	{
-		foreach(player in system.players)
-		{
-			sendPacket(player.id, prior, packet);
-		}
-	}
 	//C A L L B A C K S
+	function HookCallbacks()
+	{
+		eventsJoin.Add("onJoin", this);
+		eventsDisconect.Add("onDisconnect", this);
+		eventsHit.Add("onHit", this);
+		eventsDie.Add("onDie", this);
+		eventsTimersEnd.Add("onTimerEnd", this);
+	}
+	
 	function onDie(pid, kid)
 	{
 		if(system.bezimienny == pid)
@@ -233,11 +239,13 @@ class GameBezimienny
 			if(kid > 0)
 			{
 				AddPoints(kid, system.points.killBezi);
+				SetNewBezimienny(kid);
 			}
 			else
 			{
+				print("BEZI SUICIDE " + pid + " Killed by " + kid)
 				AddPoints(pid, system.points.beziSuicide);
-				//Losowo wybierz Bezimiennego
+				ChooseBezimienny();
 			}
 		}
 		else if(system.bezimienny == kid)
@@ -252,6 +260,7 @@ class GameBezimienny
 		{
 			AddPoints(kid, system.points.teamKill);
 		}
+		SendScroreBoard();
 	}
 	
 	function onHit(pid, tid)
@@ -277,18 +286,31 @@ class GameBezimienny
 	
 	function onDisconnect(id, reason)
 	{
-	
+		system.players.remove(GetIndexPlayer(id))
+		if(id == system.bezimienny)
+		{
+			ChooseBezimienny();
+		}
 	}
 	
 	function JoinBeforeStart(id)
 	{
 		GameStartSendParameters(id);
-		system.soldiers.push(id);
-		sendPacket(id, 2, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
 	}
 	
 	function JoinAfterStart(id)
 	{
-	
+		GameStartSendParameters(id);
+		sendPacket(id, 2, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
+		sendPacket(id, 1, format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()))
+		SendScroreBoard();
 	}
+
+	function onTimerEnd(object)
+	{
+		if(object == system.gameTime)
+		{
+			sendMessageToAll(0, 255, 0, "Gra skończona");
+		}
+	}	
 }

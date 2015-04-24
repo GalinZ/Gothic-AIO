@@ -32,7 +32,7 @@ class HeroEquipment
 		local text = "";
 		foreach(item in items)
 		{
-			text = format("%s %s %d %d %d", text, item.name, item.amount,
+			text = format("%s%s %d %d %d ", text, item.name, item.amount,
 											item.isEquipped, item.type);
 		}
 		return text;

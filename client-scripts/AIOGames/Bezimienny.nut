@@ -55,8 +55,10 @@ class GameBezimienny
 			beziEq = HeroEquipment(),
 			soldierAtr = null,
 			beziAtr = null,
+			gameTimer = Timer(TimerModes.TOZERO),
 		}
 		
+		system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
 		CreateScoreBoard();
 	} 
 	//W A I T ___ F O R  ___ P A R A M S
@@ -97,15 +99,15 @@ class GameBezimienny
 
 	function LoadHero()
 	{
-		if(system.bezimiennyID == game.myId)
+		if(IAmBezimienny())
 		{
-			beziEq.EquipHero();
-			beziAtr.UpdateHero();
+			system.beziAtr.UpdateHero();
+			system.beziEq.EquipHero();
 		}
 		else
 		{
-			soldierEq.EquipHero();
-			soldierAtr.UpdateHero();
+			system.soldierAtr.UpdateHero();
+			system.soldierEq.EquipHero();
 		}
 	}
 
@@ -124,11 +126,16 @@ class GameBezimienny
 	function GameStart()
 	{
 		system.state = GameState.STARTED;
-		eventsPacket.Add("onPacket", this);
-		eventsRespawn.Add("onRespawn", this);
+		HookCallbacks();
 		
-		system.soldierAtr.UpdateHero();
-		system.soldierEq.EquipHero();
+		LoadHero();
+		system.gameTimer.Start();
+	}
+	
+	function HookCallbacks()
+	{
+		eventsRespawn.Add("onRespawn", this);
+		eventsDie.Add("onDie", this);
 	}
 	
 	function GameEnd()
@@ -138,6 +145,7 @@ class GameBezimienny
 	
 	function BecomeTheBezimienny()
 	{
+		completeHeal();
 		system.beziAtr.UpdateHero();
 		system.beziEq.EquipHero();
 	}
@@ -187,10 +195,14 @@ class GameBezimienny
 			setDrawText(draws.scoreBoard[index], "");
 		}
 	}
+
+	function IAmBezimienny()
+	{
+		return system.bezimiennyID == game.myId;
+	}
 	// CALLBACKS
 	function onPacket(data)
 	{
-		
 		local packet = sscanf("ds", data);
 		if (packet)
 		{
@@ -209,19 +221,30 @@ class GameBezimienny
 				GetStandarHeroAttributes(GameBeziTeams.BEZI, packet[1]);
 				break;
 			case GameBeziPackets.IDOFBEZI:
-				system.bezimiennyID = packet[1].tointeger();
-				if(system.bezimiennyID == game.myId)
+				print("Nowy bezi : " + packet[1]);
+				if(IAmBezimienny() && system.bezimiennyID != packet[1].tointeger())
 				{
-					BecomeTheBezimienny();
+					system.bezimiennyID = packet[1].tointeger();
+					LoadHero();
 				}
+				else
+				{
+					system.bezimiennyID = packet[1].tointeger();
+					if(IAmBezimienny())
+					{
+						BecomeTheBezimienny();
+					}
+				}
+				break;
+			case GameBeziPackets.SENDTIME:
+				system.gameTimer.SetTime(packet[1].tointeger());
 				break;
 			case GameBeziPackets.UPDATESCORE:
 				UpdateScore(packet[1]);
 				break;
 			case GameBeziPackets.STARTGAME:
 				GameStart();
-				break;
-			
+				break;			
 			}
         }
 	}
@@ -230,7 +253,14 @@ class GameBezimienny
 	{
 		completeHeal();
 		LoadHero();
-	}
+	}	
 
-	
+	function onDie()
+	{
+		if(IAmBezimienny)
+		{
+			print("Usun beziego ze mnie")
+			system.bezimiennyID = -1;
+		}
+	}
 }

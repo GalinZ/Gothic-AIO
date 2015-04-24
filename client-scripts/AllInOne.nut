@@ -70,13 +70,14 @@ function onKey(key)
 //Timer
 function onUpdate() // 100ms
 {
-	eventsTimersEnd.Call();
+	rand();
+	eventsUpdate.Call();
 }
 function onTimerEnd(object)
 {
 	eventsTimersEnd.Call(object);
 }
-function classTimer(obiect)
+function classTimer(object)
 {
 	if(object.params == null)
 	{
@@ -88,10 +89,8 @@ function classTimer(obiect)
 	}
 }
 
-
 function onInit()
 {
 	setTimer(onUpdate, 100, true);
-
 };
 
