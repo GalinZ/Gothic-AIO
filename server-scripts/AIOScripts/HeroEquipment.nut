@@ -37,6 +37,64 @@ class HeroEquipment
 		}
 		return text;
 	}
+/*O N L Y ___ C L I E N T
+	function EquipHero()
+	{
+		clearInventory();
+		foreach(item in items)
+		{
+			if(item.isEquipped == 1)
+			{
+				switch(item.type)
+				{
+				case ItemType.MELLE:
+					equipMeleeWeapon(item.name);
+					break;
+				case ItemType.DISTANCE:
+					equipRangedWeapon(item.name);
+					break;
+				case ItemType.ARMOR:
+					equipArmor(item.name);
+					break;
+				default:
+					giveItem(item.name, 1);
+					break;
+				}
+				
+				if(item.amount > 1)
+				{
+					giveItem(item.name, item.amount - 1);
+				}
+			}
+			else
+			{
+				giveItem(item.name, item.amount);
+			}
+		}
+	}
+*/
+
+	function covertString(params)
+	{	
+		do
+		{
+			local item = sscanf("sddds", params);
+			if(item)
+			{
+				Add(item[0], item[1], item[2], item[3]);
+				params = item[4];
+			}
+			else
+			{
+				local item = sscanf("sddd", params);
+				if(item)
+				{
+					Add(item[0], item[1], item[2], item[3]);
+				}
+				break;
+			}
+		}while(true)
+	}
 }
 
 class Item

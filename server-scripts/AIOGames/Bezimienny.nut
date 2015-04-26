@@ -104,6 +104,18 @@ class GameBezimienny
 		}
 	}
 	
+	function GetIndexPlayer(id)
+	{
+		for(local i=0; i<system.players.len(); i++)
+		{
+			if(system.players[i].id == id)
+			{
+				return i;
+			}
+		}
+		//Wykluczone!!!
+		return -1;
+	}
 	//W A I T ___ F O R ___ P L A Y E R S
 	function GameInitPlayers()
 	{
@@ -155,7 +167,7 @@ class GameBezimienny
 		local newBezi = -1;
 		do
 		{
-			if(system.players.len() > 0){	break;}
+			if(system.players.len() == 0){	break;}
 			newBezi = system.players[random(system.players.len())].id;
 		}while(newBezi == system.bezimienny && system.players.len() > 1)
 		SetNewBezimienny(newBezi);
@@ -179,36 +191,43 @@ class GameBezimienny
 	}
 	
 	//G A M E ___ L O G I C
-	function BeziKillSoldier(beziID, soldierID)
+	function BeziKillSoldier(bezi, soldier)
 	{
+		AddPoints(bezi, system.points.killSoldier);
 	}
 	
-	function SoldierKillBezi(soldierID, beziID)
+	function SoldierKillBezi(soldier, bezi)
 	{
-	
+		AddPoints(soldier, system.points.killBezi);
+		SetNewBezimienny(soldier);
 	}
 	
-	function SoldierHitBezi(soldierID, beziID)
+	function SoldierHitBezi(soldier, bezi)
 	{
+		AddPoints(pid, system.points.hitBezi);
+	}
 	
+	function Suicide(victim)
+	{
+		if(victim == system.bezimienny)
+		{
+			AddPoints(victim, system.points.beziSuicide);
+			ChooseBezimienny();
+		}
+		else
+		{
+			AddPoints(victim, system.points.suicide);
+		}
+	}
+	
+	function TeamKill(killer, victim)
+	{
+		AddPoints(killer, system.points.teamKill);
 	}
 	
 	function AddPoints(id, value)
 	{
 		system.players[GetIndexPlayer(id)].SetPoints(value, "+");
-	}
-
-	function GetIndexPlayer(id)
-	{
-		for(local i=0; i<system.players.len(); i++)
-		{
-			if(system.players[i].id == id)
-			{
-				return i;
-			}
-		}
-		//Wykluczone!!!
-		return -1;
 	}
 	
 	function SendScroreBoard()
@@ -232,42 +251,33 @@ class GameBezimienny
 		eventsTimersEnd.Add("onTimerEnd", this);
 	}
 	
-	function onDie(pid, kid)
+	function onDie(victim, killer)
 	{
-		if(system.bezimienny == pid)
+		if(killer == -1)
 		{
-			if(kid > 0)
-			{
-				AddPoints(kid, system.points.killBezi);
-				SetNewBezimienny(kid);
-			}
-			else
-			{
-				print("BEZI SUICIDE " + pid + " Killed by " + kid)
-				AddPoints(pid, system.points.beziSuicide);
-				ChooseBezimienny();
-			}
+			Suicide(victim);
 		}
-		else if(system.bezimienny == kid)
+		else if(system.bezimienny == victim)
 		{
-			AddPoints(kid, system.points.killSoldier);
+			SoldierKillBezi(killer, victim);
 		}
-		else if(kid == -1)
+		else if(system.bezimienny == killer)
 		{
-			AddPoints(pid, system.points.suicide);
+			BeziKillSoldier(killer, victim);
 		}
 		else
 		{
-			AddPoints(kid, system.points.teamKill);
+			TeamKill(killer, victim)
 		}
 		SendScroreBoard();
 	}
 	
-	function onHit(pid, tid)
+	function onHit(killer, target)
 	{
-		if(tid == system.bezimienny && pid > 0)
+		print("KID " + killer + " Targt " + target);
+		if(target == system.bezimienny && killer > 0)
 		{
-			AddPoints(pid, system.points.hitBezi);
+			SoldierHitBezi(killer, target)
 		}
 	}
 	

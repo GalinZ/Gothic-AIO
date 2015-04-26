@@ -33,6 +33,14 @@ class HeroAttributes
 		protM = _protM;
 	}	
 	
+	function _tostring()
+	{
+		return format("%d %d %d %d %d %d %d %d %d %d %d %d %d",
+						hp, mp, str, dex, 
+						h1, h2,	bow, cbow, mlvl,
+						protS, protO, protA, protM);
+	}
+
 	function UpdateHero()
 	{
 		setMaxHealth(hp);
@@ -50,7 +58,5 @@ class HeroAttributes
 		//protA
 		//protM
 	}
-
-	
 }
 

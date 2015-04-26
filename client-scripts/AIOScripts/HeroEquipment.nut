@@ -88,7 +88,7 @@ class HeroEquipment
 				local item = sscanf("sddd", params);
 				if(item)
 				{
-					system.beziEq.Add(item[0], item[1], item[2], item[3]);
+					Add(item[0], item[1], item[2], item[3]);
 				}
 				break;
 			}

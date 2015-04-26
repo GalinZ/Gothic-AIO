@@ -1,4 +1,4 @@
-
+//Ustawienie drawów i textur
 function PointToPx(value, mode)
 {
 	local res = getResolution();
@@ -38,6 +38,7 @@ function PerPoint(percent)
 	return result.tointeger();
 };
 
+//Przesyłanie Nazwy gracza przez pakiety
 function ConvertName(text, fromChar, toChar)
 {
 	local i = 0;
@@ -74,6 +75,7 @@ function ConvertName(text, fromChar, toChar)
 	return newText;
 }
 
+//System tworzenia timerów w klasach
 function setTimerClass(_inst, _func, _time, _repeat, _params = null)
 {
 	local object ={inst = _inst, func = _func , params = _params}
@@ -92,6 +94,7 @@ function classTimer(object)
 	}
 }
 
+//Funkcja losująca
 function random(value1, value2 = null)
 {
 	if(value2 == null)
@@ -109,4 +112,58 @@ function random(value1, value2 = null)
 	{
 		return value1 + (rand()%(value2-value1 + 1));
 	}
+}
+
+//System plików
+function writeToFile(path, text, mode)
+{
+	local myfile = file(path, mode);
+	if(!myfile.eos())
+	{
+		write(myfile, "\n");
+	}
+	write(myfile, text);
+	myfile.close();
+}
+
+function readFromFile(path)
+{
+	local myfile = file(path, "r");
+	local text = "";
+	do
+	{
+		text += readLine(myfile);
+	}while(!myfile.eos())
+	myfile.close();
+	return text;
+}
+
+function write(handle, text)
+{
+    foreach (char in text)
+	{
+        handle.writen(char, 'b');
+	}
+}
+
+function readLine(handle)
+{
+    local line = "";
+    while (!handle.eos())
+    {
+        local char = handle.readn('b');
+        line += char.tochar();
+        
+        if (char == '\n') return line;
+    }
+    
+    return line;
+}
+
+//Pomocne - Zapis pozycji do pliku
+function SavePosition(path)
+{
+    local pos = getPosition();
+	local angle = getAngle();
+	writeToFile(path, format("%d %d %d %d", pos.x, pos.y, pos.z, angle), "a");
 }

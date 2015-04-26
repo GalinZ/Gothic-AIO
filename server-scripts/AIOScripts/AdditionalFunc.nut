@@ -1,3 +1,44 @@
+/* Only Client
+function PointToPx(value, mode)
+{
+	local res = getResolution();
+	local result = 0;
+	if(mode == "y")
+	{
+		result = value * (res.height / 8192.0);
+	}
+	else
+	{
+		result = value * (res.width / 8192.0);
+	}
+	
+	return result.tointeger();	
+};
+
+function PxToPoint(value, mode)
+{
+	local res = getResolution();
+	
+	local result = 0;
+	if(mode == "y")
+	{
+		result = value * (8192.0 / res.height);
+	}
+	else
+	{
+		result = value * (8192.0 / res.width);
+	}
+	
+	return result.tointeger();
+};
+
+function PerPoint(percent)
+{
+	local result = 81.92 * percent;
+	return result.tointeger();
+};
+*/
+
 function ConvertName(text, fromChar, toChar)
 {
 	local i = 0;
@@ -69,4 +110,56 @@ function random(value1, value2 = null)
 	{
 		return value1 + (rand()%(value2-value1 + 1));
 	}
+}
+
+function writeToFile(path, text, mode)
+{
+	local myfile = file(path, mode);
+	if(!myfile.eos())
+	{
+		write(myfile, "\n");
+	}
+	write(myfile, text);
+	myfile.close();
+}
+
+function readFromFile(path)
+{
+	local myfile = file(path, "r");
+	local text = "";
+	do
+	{
+		text += readLine(myfile);
+	}while(!myfile.eos())
+	myfile.close();
+	return text;
+}
+
+function write(handle, text)
+{
+    foreach (char in text)
+	{
+        handle.writen(char, 'b');
+	}
+}
+
+function readLine(handle)
+{
+    local line = "";
+    while (!handle.eos())
+    {
+        local char = handle.readn('b');
+        line += char.tochar();
+        
+        if (char == '\n') return line;
+    }
+    
+    return line;
+}
+
+function SavePosition(id, path)
+{
+    local pos = getPosition(id);
+	local angle = 0;
+	writeToFile(path, format("%d %d %d %d", pos.x, pos.y, pos.z, angle), "a");
 }

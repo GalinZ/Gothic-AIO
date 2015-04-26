@@ -42,5 +42,24 @@ class HeroAttributes
 						h1, h2,	bow, cbow, mlvl,
 						protS, protO, protA, protM);
 	}
+/*O N L Y  ___ C L I E N T
+	function UpdateHero()
+	{
+		setMaxHealth(hp);
+		setHealth(hp);
+		setMaxMana(mp);
+		setMana(mp);
+		setDexterity(dex);
+		setStrength(str);
+		setWeaponSkill(1, h1);
+		setWeaponSkill(2, h2);
+		setWeaponSkill(3, bow);
+		setWeaponSkill(4, cbow);
+		//protS
+		//protO
+		//protA
+		//protM
+	}
+*/
 }
 

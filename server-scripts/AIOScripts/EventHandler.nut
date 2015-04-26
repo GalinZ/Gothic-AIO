@@ -1,4 +1,4 @@
-//print("LOAD: EVENT HANDLER");
+print("LOAD: EVENT HANDLER");
 
 class EventClass
 {

@@ -4,10 +4,16 @@ print("# LOADING  START #");
 print("##################");
 print("");
 
+
 dofile("server-scripts\\AIOScripts\\AdditionalFunc.nut");
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
 dofile("server-scripts\\AIOGames\\GameSystem.nut");
 
+local DEBUG = true;
+if(DEBUG)
+{
+	dofile("Debug.nut");
+}
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
@@ -111,44 +117,9 @@ function onTimerEnd(object)
 
 function onInit()
 {
+	if(DEBUG){print("DEBUG MODE")};
 	setTimer(onUpdate, 100, true);
 	game.LoadGame("Bezimienny");
-}
-
-function ConvertName(text, fromChar, toChar)
-{
-	local i = 0;
-	local last = 0;
-	local newText = "";
-	do
-	{
-		i = text.find(fromChar, i + 1);
-		if(i)
-		{
-			if(newText == "")
-			{
-				newText += text.slice(last, i);
-			}
-			else
-			{
-				newText += toChar + text.slice(last, i);
-			}
-			last = i + 1;
-		}
-		else
-		{
-			if(newText == "")
-			{
-				newText += text.slice(last);
-			}
-			else
-			{
-				newText += toChar + text.slice(last);
-			}
-		}
-	}while(i)
-
-	return newText;
 }
 
 print("");
@@ -156,5 +127,3 @@ print("##################");
 print("#LOADING COMPLETE#");
 print("##################");
 print("");
-
-

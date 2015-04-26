@@ -2,6 +2,11 @@ dofile("Multiplayer\\Script\\AIOScripts\\AdditionalFunc.nut");
 dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
 dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
 
+local DEBUG = true;
+if(DEBUG)
+{
+	dofile("Multiplayer\\Script\\Debug.nut");
+}
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
 
@@ -77,20 +82,11 @@ function onTimerEnd(object)
 {
 	eventsTimersEnd.Call(object);
 }
-function classTimer(object)
-{
-	if(object.params == null)
-	{
-		object.inst[object.func]();
-	}
-	else
-	{
-		object.inst[object.func](object.params);
-	}
-}
+
 
 function onInit()
 {
+	if(DEBUG){print("DEBUG MODE")};
 	setTimer(onUpdate, 100, true);
 };
 
