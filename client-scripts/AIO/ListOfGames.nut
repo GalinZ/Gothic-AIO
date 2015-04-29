@@ -1,8 +1,8 @@
 
 //Dodać tu wszystkie pliki gier z folderu AIOGames Klient
 
-dofile("Multiplayer\\Script\\AIOGames\\Includes\\Bezimienny.nut");
-dofile("Multiplayer\\Script\\AIOGames\\Bezimienny.nut");
+dofile("Multiplayer\\Script\\AIO\\Games\\Includes\\Bezimienny.nut");
+dofile("Multiplayer\\Script\\AIO\\Games\\Bezimienny.nut");
 
 listOfGame  <-
 {

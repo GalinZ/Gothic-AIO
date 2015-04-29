@@ -1,6 +1,6 @@
-dofile("Multiplayer\\Script\\AIOScripts\\AdditionalFunc.nut");
-dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
-dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
+dofile("Multiplayer\\Script\\AIO\\Scripts\\AdditionalFunc.nut");
+dofile("Multiplayer\\Script\\AIO\\Scripts\\EventHandler.nut");
+dofile("Multiplayer\\Script\\AIO\\GameSystem.nut");
 
 local DEBUG = true;
 

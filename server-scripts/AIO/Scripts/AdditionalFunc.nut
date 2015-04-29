@@ -180,16 +180,11 @@ function sscanfMulti(params, text)
 	params += "s";
 	local table = [];
 	local result;
-	while(result = sscanf(params, text))
+	while ( result = sscanf(params, text))
 	{
-		foreach(item in result)
-		{
-			print(item)
-		}
 		text = result.pop();
 		table.push(result);
 	}
-	print("Len " +  table.len());
 	return table.len() ? table : null;
 }
 

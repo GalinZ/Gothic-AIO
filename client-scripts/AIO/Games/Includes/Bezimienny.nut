@@ -1,4 +1,4 @@
 
-dofile("Multiplayer\\Script\\AIOScripts\\HeroAttributes.nut");
-dofile("Multiplayer\\Script\\AIOScripts\\HeroEquipment.nut");
-dofile("Multiplayer\\Script\\AIOScripts\\Timer.nut");
+dofile("Multiplayer\\Script\\AIO\\Scripts\\HeroAttributes.nut");
+dofile("Multiplayer\\Script\\AIO\\Scripts\\HeroEquipment.nut");
+dofile("Multiplayer\\Script\\AIO\\Scripts\\Timer.nut");

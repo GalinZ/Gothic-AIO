@@ -6,9 +6,9 @@ print("");
 
 local DEBUG = true;
 
-dofile("server-scripts\\AIOScripts\\AdditionalFunc.nut");
-dofile("server-scripts\\AIOScripts\\EventHandler.nut");
-dofile("server-scripts\\AIOGames\\GameSystem.nut");
+dofile("server-scripts\\AIO\\Scripts\\AdditionalFunc.nut");
+dofile("server-scripts\\AIO\\Scripts\\EventHandler.nut");
+dofile("server-scripts\\AIO\\GameSystem.nut");
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
@@ -113,7 +113,8 @@ function onTimerEnd(object)
 function onInit()
 {
 	setTimer(onUpdate, 100, true);
-	game.LoadGame("Bezimienny");
+	game.Init();
+	//game.LoadGame("Bezimienny");
 }
 
 print("");
@@ -124,5 +125,5 @@ print("");
 
 if(DEBUG)
 {
-	dofile("server-scripts\\Debug.nut");
+	dofile("server-scripts\\AIO\\Debug.nut");
 }

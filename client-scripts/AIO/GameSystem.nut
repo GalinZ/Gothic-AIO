@@ -1,4 +1,4 @@
-dofile("Multiplayer\\Script\\AIOGames\\ListOfGames.nut");
+dofile("Multiplayer\\Script\\AIO\\ListOfGames.nut");
 
 enum GameState
 {

@@ -131,7 +131,6 @@ class GameBezimienny
 		SendPacketToAll(format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()), 2);
 		GameStartSendParameters();
 		timers.startGame <- setTimerClass(this, "GameStart", 3000, false);
-		//timers.startGame <- setTimer(GameStart, 3000, false, this);
 	}
 	
 	function LoadPlayers()
@@ -192,8 +191,7 @@ class GameBezimienny
 		HookCallbacks();
 		system.gameTime.Start();
 		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME), 2);
-		//timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
-		timers.scoreboard <- setTimer(SendScroreBoard, 3000, true, this);
+		timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
 		ChooseBezimienny();
 		SendScroreBoard();
 	}
