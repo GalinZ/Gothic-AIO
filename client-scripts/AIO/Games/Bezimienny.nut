@@ -56,6 +56,7 @@ class GameBezimienny
 			soldierAtr = null,
 			beziAtr = null,
 			gameTimer = Timer(TimerModes.TOZERO),
+			spawns = [],
 		}
 		
 		system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
@@ -122,6 +123,11 @@ class GameBezimienny
 			setDrawVisible(newDraw, true);
 		}
 	}
+	
+	function GetRespawnPositions(data)
+	{
+			scores += " protectionWord";
+	}
 	//G A M E ___ S T A R T
 	function GameStart()
 	{
@@ -152,6 +158,7 @@ class GameBezimienny
 	
 	function UpdateScore(scores)
 	{	
+		scores += " protectionWord"
 		local index = 0;
 		do
 		{
@@ -172,7 +179,7 @@ class GameBezimienny
 			}
 			else
 			{
-				local params = sscanf("dsd", scores)
+			/*	local params = sscanf("dsd", scores)
 				if(params)
 				{
 					if(params[0] == system.bezimiennyID)
@@ -186,6 +193,7 @@ class GameBezimienny
 					setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)",params[2], ConvertName(params[1], "_", " "), params[0]));
 					index++;
 				}
+			*/
 				break;
 			}
 		}while(true && index < 20);
@@ -200,6 +208,7 @@ class GameBezimienny
 	{
 		return system.bezimiennyID == game.myId;
 	}
+	
 	// CALLBACKS
 	function onPacket(data)
 	{
@@ -253,13 +262,15 @@ class GameBezimienny
 	{
 		completeHeal();
 		LoadHero();
+		local pos = system.spawns[random(system.spawns.len())];
+		setPosition(pos.x, pos.y, pos.z);
+		setAngle(pos.a);
 	}	
 
 	function onDie()
 	{
-		if(IAmBezimienny)
+		if(IAmBezimienny())
 		{
-			print("Usun beziego ze mnie")
 			system.bezimiennyID = -1;
 		}
 	}

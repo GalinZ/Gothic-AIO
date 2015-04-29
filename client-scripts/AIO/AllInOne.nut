@@ -3,10 +3,7 @@ dofile("Multiplayer\\Script\\AIOScripts\\EventHandler.nut");
 dofile("Multiplayer\\Script\\AIOGames\\GameSystem.nut");
 
 local DEBUG = true;
-if(DEBUG)
-{
-	dofile("Multiplayer\\Script\\Debug.nut");
-}
+
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
 
@@ -86,7 +83,11 @@ function onTimerEnd(object)
 
 function onInit()
 {
-	if(DEBUG){print("DEBUG MODE")};
 	setTimer(onUpdate, 100, true);
 };
 
+
+if(DEBUG)
+{
+	dofile("Multiplayer\\Script\\Debug.nut");
+}

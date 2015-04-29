@@ -25,27 +25,25 @@ class GameBezimienny
 	timers = null;
 	system = null;
 	events = null;
+	parameters = null;
 	
 	constructor()
 	{
 		timers ={};
 		system ={ state = GameState.OFF,};
+		parameters ={};
 		events ={};
 	}
 	// I N I T
 	function OnInit()
 	{
 		system ={
-			state = GameState.INIT,
 			players	= [],
-			soldiers = [],
 			bezimienny = -1,
-			minPlayers = 3,
 			
+			state = GameState.INIT,
 			gameTime = Timer(TimerModes.TOZERO),
-			//roundTime = 5*60*10, 
-			roundTime = 30*10, 
-			delayTime = 1*60*10, 
+			
 			points ={
 				beziSuicide = -500,
 				teamKill = -150,
@@ -54,7 +52,15 @@ class GameBezimienny
 				killSoldier = 50,
 				killBezi = 100,
 			},
-			
+		}
+		
+		parameters ={
+			minPlayers = 3,
+			roundTime = 5*60, 
+			delayTime = 1*60,
+			mapSpawns = "spawns_castle",
+			mapVobs = "NULL",
+				
 			soldierAtr = HeroAttributes(360, 0, 54, 35,
 									100, 100, 0, 100, 0,
 									0, 0, 0, 0),
@@ -64,8 +70,8 @@ class GameBezimienny
 									0, 100, 0, 0, 0,
 									0, 0, 0, 0),
 			beziEq = HeroEquipment(),
-	
 		}
+		
 		StandardEquipment();
 		StandardFunctions();
 		//eventsStart
@@ -86,14 +92,14 @@ class GameBezimienny
 	function StandardEquipment()
 	{
 		//Soldier equipment
-		system.soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.ARMOR);
-		system.soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.MELLE);
-		system.soldierEq.Add("ITRW_CROSSBOW_01", 1, 1, ItemType.DISTANCE);
-		system.soldierEq.Add("ITAMBOLT", 10, 1, ItemType.OTHER);
+		parameters.soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.ARMOR);
+		parameters.soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.MELLE);
+		parameters.soldierEq.Add("ITRW_CROSSBOW_01", 1, 1, ItemType.DISTANCE);
+		parameters.soldierEq.Add("ITAMBOLT", 10, 1, ItemType.OTHER);
 		
 		//Bezimienny equipment
-		system.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.ARMOR);
-		system.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
+		parameters.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.ARMOR);
+		parameters.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
 	}
 	
 	function SendPacketToAll(packet, prior = 1)
@@ -120,11 +126,12 @@ class GameBezimienny
 	function GameInitPlayers()
 	{
 		LoadPlayers();
-		system.gameTime.SetTime(system.roundTime * 100);
+		system.gameTime.SetTime(parameters.roundTime * 100);
 		SendPacketToAll(format("%d Bezimienny" ,GameSystemPacket.INIT_GAME), 2);
 		SendPacketToAll(format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()), 2);
 		GameStartSendParameters();
 		timers.startGame <- setTimerClass(this, "GameStart", 3000, false);
+		//timers.startGame <- setTimer(GameStart, 3000, false, this);
 	}
 	
 	function LoadPlayers()
@@ -137,11 +144,11 @@ class GameBezimienny
 		
 	function GameStartSendParameters(player = -1)
 	{
-		local paramsAtrB = GameBeziPackets.ATRFORBEZI + " " + system.beziAtr.tostring();
-		local paramsEqB = GameBeziPackets.EQFORBEZI + " " + system.beziEq.tostring();
+		local paramsAtrB = GameBeziPackets.ATRFORBEZI + " " + parameters.beziAtr.tostring();
+		local paramsEqB = GameBeziPackets.EQFORBEZI + " " + parameters.beziEq.tostring();
 		
-		local paramsAtrS = GameBeziPackets.ATRFORSOLDIER + " " + system.soldierAtr.tostring();
-		local paramsEqS = GameBeziPackets.EQFORSOLDIER + " " + system.soldierEq.tostring();
+		local paramsAtrS = GameBeziPackets.ATRFORSOLDIER + " " + parameters.soldierAtr.tostring();
+		local paramsEqS = GameBeziPackets.EQFORSOLDIER + " " + parameters.soldierEq.tostring();
 		
 		if(player == -1)
 		{
@@ -185,7 +192,8 @@ class GameBezimienny
 		HookCallbacks();
 		system.gameTime.Start();
 		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME), 2);
-		timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
+		//timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
+		timers.scoreboard <- setTimer(SendScroreBoard, 3000, true, this);
 		ChooseBezimienny();
 		SendScroreBoard();
 	}

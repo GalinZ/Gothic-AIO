@@ -39,6 +39,7 @@ function PerPoint(percent)
 };
 */
 
+//Przesy³anie Nazwy gracza przez pakiety
 function ConvertName(text, fromChar, toChar)
 {
 	local i = 0;
@@ -75,6 +76,7 @@ function ConvertName(text, fromChar, toChar)
 	return newText;
 }
 
+//System tworzenia timerów w klasach
 function setTimerClass(_inst, _func, _time, _repeat, _params = null)
 {
 	local object ={inst = _inst, func = _func , params = _params}
@@ -93,6 +95,7 @@ function classTimer(object)
 	}
 }
 
+//Funkcja losuj¹ca
 function random(value1, value2 = null)
 {
 	if(value2 == null)
@@ -112,6 +115,7 @@ function random(value1, value2 = null)
 	}
 }
 
+//System plików
 function writeToFile(path, text, mode)
 {
 	local myfile = file(path, mode);
@@ -146,20 +150,46 @@ function write(handle, text)
 function readLine(handle)
 {
     local line = "";
-    while (!handle.eos())
+    while ( !handle.eos())
     {
         local char = handle.readn('b');
         line += char.tochar();
         
-        if (char == '\n') return line;
+        if (char == '\n')
+		{
+			return line
+		};
     }
     
     return line;
 }
 
-function SavePosition(id, path)
+function SavePosition(id, path, additionalMessage = "")
 {
     local pos = getPosition(id);
 	local angle = 0;
-	writeToFile(path, format("%d %d %d %d", pos.x, pos.y, pos.z, angle), "a");
+	local text = format("%d %d %d %d %s", pos.x, pos.y, pos.z, angle, additionalMessage)
+	print("Dodano pozycjê " + text)
+	writeToFile(path, text, "a");
 }
+
+
+function sscanfMulti(params, text)
+{
+	text += " protectionWord";
+	params += "s";
+	local table = [];
+	local result;
+	while(result = sscanf(params, text))
+	{
+		foreach(item in result)
+		{
+			print(item)
+		}
+		text = result.pop();
+		table.push(result);
+	}
+	print("Len " +  table.len());
+	return table.len() ? table : null;
+}
+

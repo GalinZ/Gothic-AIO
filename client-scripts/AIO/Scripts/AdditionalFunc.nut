@@ -1,4 +1,4 @@
-//Ustawienie drawÃ³w i textur
+//Ustawienie drawów i textur
 function PointToPx(value, mode)
 {
 	local res = getResolution();
@@ -38,7 +38,7 @@ function PerPoint(percent)
 	return result.tointeger();
 };
 
-//PrzesyÅ‚anie Nazwy gracza przez pakiety
+//Przesy³anie Nazwy gracza przez pakiety
 function ConvertName(text, fromChar, toChar)
 {
 	local i = 0;
@@ -75,7 +75,7 @@ function ConvertName(text, fromChar, toChar)
 	return newText;
 }
 
-//System tworzenia timerÃ³w w klasach
+//System tworzenia timerów w klasach
 function setTimerClass(_inst, _func, _time, _repeat, _params = null)
 {
 	local object ={inst = _inst, func = _func , params = _params}
@@ -94,7 +94,7 @@ function classTimer(object)
 	}
 }
 
-//Funkcja losujÄ…ca
+//Funkcja losuj¹ca
 function random(value1, value2 = null)
 {
 	if(value2 == null)
@@ -114,7 +114,7 @@ function random(value1, value2 = null)
 	}
 }
 
-//System plikÃ³w
+//System plików
 function writeToFile(path, text, mode)
 {
 	local myfile = file(path, mode);
@@ -149,21 +149,46 @@ function write(handle, text)
 function readLine(handle)
 {
     local line = "";
-    while (!handle.eos())
+    while ( !handle.eos())
     {
         local char = handle.readn('b');
         line += char.tochar();
         
-        if (char == '\n') return line;
+        if (char == '\n')
+		{
+			return line
+		};
     }
     
     return line;
 }
 
 //Pomocne - Zapis pozycji do pliku
-function SavePosition(path)
+function SavePosition(path, additionalMessage = "")
 {
     local pos = getPosition();
 	local angle = getAngle();
-	writeToFile(path, format("%d %d %d %d", pos.x, pos.y, pos.z, angle), "a");
+	local text = format("%d %d %d %d", pos.x, pos.y, pos.z, angle, additionalMessage)
+	print("Dodano pozycjê " + text)
+	writeToFile(path, text, "a");
 }
+
+
+function sscanfMulti(params, text)
+{
+	text += " protectionWord";
+	params += "s";
+	local table = [];
+	local result;
+	while ( result == sscanf(params, text))
+	{
+		foreach(item in result)
+		{
+			print(item)
+		}
+		params = result.pop();
+		table.push(result);
+	}
+	return table.len() ? table : null;
+}
+

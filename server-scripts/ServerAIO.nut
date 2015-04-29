@@ -4,16 +4,11 @@ print("# LOADING  START #");
 print("##################");
 print("");
 
+local DEBUG = true;
 
 dofile("server-scripts\\AIOScripts\\AdditionalFunc.nut");
 dofile("server-scripts\\AIOScripts\\EventHandler.nut");
 dofile("server-scripts\\AIOGames\\GameSystem.nut");
-
-local DEBUG = true;
-if(DEBUG)
-{
-	dofile("Debug.nut");
-}
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
@@ -117,7 +112,6 @@ function onTimerEnd(object)
 
 function onInit()
 {
-	if(DEBUG){print("DEBUG MODE")};
 	setTimer(onUpdate, 100, true);
 	game.LoadGame("Bezimienny");
 }
@@ -127,3 +121,8 @@ print("##################");
 print("#LOADING COMPLETE#");
 print("##################");
 print("");
+
+if(DEBUG)
+{
+	dofile("server-scripts\\Debug.nut");
+}
