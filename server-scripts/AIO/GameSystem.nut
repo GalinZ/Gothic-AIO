@@ -204,7 +204,7 @@ class Game
 			print("ListOfGame nie posiada gry : " + _name);
 			return false;
 		}
-		// Test czy plik parametrów jest
+		// Test czy plik parametrÃ³w jest
 		local myfile;
 		try
 		{
@@ -213,10 +213,10 @@ class Game
 		}
 		catch(error)
 		{
-			print("Nie ma pliku parametrów o naziwe: " + _params);
+			print("Nie ma pliku parametrÃ³w o naziwe: " + _params);
 			return false;
 		}
-		// Test czy s¹ dodatki
+		// Test czy sÄ… dodatki
 		if(_addons != "NULL")
 		{
 			myfile = null;
