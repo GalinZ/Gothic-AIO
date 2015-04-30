@@ -136,7 +136,7 @@ class Game
 		{
 			print("ListOfGame nie posiada gry : " + _name);
 		}
-		// Test czy plik parametrów jest
+		// Test czy plik parametrÃ³w jest
 		local myfile;
 		try
 		{
@@ -145,9 +145,9 @@ class Game
 		}
 		catch(error)
 		{
-			print("Nie ma pliku parametrów o naziwe: " + _params);
+			print("Nie ma pliku parametrÃ³w o naziwe: " + _params);
 		}
-		// Test czy s¹ dodatki
+		// Test czy sÂ¹ dodatki
 		if(_addons != "NULL")
 		{
 			myfile = null;
@@ -163,3 +163,77 @@ class Game
 		}
 	}
 }
+
+enum VOTEMODES
+{
+	KICK,
+	SELECTMAP,
+	ENDGAME,
+}
+
+class Vote
+{
+	votes = null;
+	playersVoting = null;
+	
+	constructor (id, mode, params)
+	{	
+		
+	}
+	
+	function convertText(id, mode, params)
+	{
+		switch(mode)
+		{
+		case VOTEMODES.KICK:
+			return format("%s(%d) wants kick from game %s(%d)", getpalyername(id), id, getpalyername(params), params);
+		case VOTEMODES.SELECTMAP
+			return format("%s(%d) wants to change mode on %s", getpalyername(id), id, params);
+		}
+	}
+	
+	function getVote(id, value)
+	{
+		votes.push({id = id, value = value});
+		if(votes.len() = ) 
+		{
+		
+		}
+	}
+}
+
+class Vote
+{
+	myVote = null;
+	drawQuestion = null;
+	drawResults = null;
+	
+	function constructor(_text)
+	{
+		textQuestion = CreateDraw(_text)
+		drawResults = CreateDraw(format("F3:Yes F4:No %d/%d", 0, 0));
+	}
+	
+	function updateResults(votesYes, votesNo)
+	{
+		drawResults = TextDraw(format("F3:Yes F4:No %d/%d", votesYes, votesNo));
+	}
+	
+	function onKey(key)
+	{
+		if(myVote == null)
+		{
+			if (key == KEY_F3)
+			{
+				myVote = true;
+				sendPacket(format("%d %d", SENDVOTE, myVote);
+			}
+			else if (key == KEY_F4)
+			{
+				myVote = false;
+				sendPacket(format("%d %d", SENDVOTE, myVote);
+			}
+		}
+	}
+}
+
