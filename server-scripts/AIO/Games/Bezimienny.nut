@@ -12,6 +12,7 @@ enum GameBeziPackets
 	SENDTIME = 1008
 }
 
+
 enum GameBeziFuncs
 {
 	BEZI_KILL_SOLDIER,
@@ -27,16 +28,12 @@ class GameBezimienny
 	events = null;
 	parameters = null;
 	
-	constructor()
+	// I N I T
+	function Init()
 	{
 		timers ={};
-		system ={ state = GameState.OFF,};
-		parameters ={};
 		events ={};
-	}
-	// I N I T
-	function OnInit()
-	{
+	
 		system ={
 			players	= [],
 			bezimienny = -1,
@@ -52,7 +49,7 @@ class GameBezimienny
 				killSoldier = 50,
 				killBezi = 100,
 			},
-		}
+		};
 		
 		parameters ={
 			minPlayers = 3,
@@ -70,14 +67,21 @@ class GameBezimienny
 									0, 100, 0, 0, 0,
 									0, 0, 0, 0),
 			beziEq = HeroEquipment(),
-		}
+		};
 		
 		StandardEquipment();
 		StandardFunctions();
-		//eventsStart
-		//eventsEnd
+		GameInitPlayers();
 	}
 		
+	function DeInit()
+	{
+		timers = null;
+		system = null;
+		events = null;
+		parameters = null;
+	}
+	
 	function StandardFunctions()
 	{
 		events[GameBeziFuncs.BEZI_KILL_SOLDIER] <- EventHandler();
@@ -110,19 +114,6 @@ class GameBezimienny
 		}
 	}
 	
-	function GetIndexPlayer(id)
-	{
-		for(local i=0; i<system.players.len(); i++)
-		{
-			if(system.players[i].id == id)
-			{
-				return i;
-			}
-		}
-		//Wykluczone!!!
-		return -1;
-	}
-	//W A I T ___ F O R ___ P L A Y E R S
 	function GameInitPlayers()
 	{
 		LoadPlayers();
@@ -135,12 +126,25 @@ class GameBezimienny
 	
 	function LoadPlayers()
 	{
-		foreach(id in game.players)
+		foreach(id in gameSystem.players)
 		{
 			system.players.push(PlayerParameters(id));
 		}
 	}
-		
+
+	function GetIndexPlayer(id)
+	{
+		for(local i=0; i<system.players.len(); i++)
+		{
+			if(system.players[i].id == id)
+			{
+				return i;
+			}
+		}
+		//Wykluczone!!!
+		return -1;
+	}	
+	
 	function GameStartSendParameters(player = -1)
 	{
 		local paramsAtrB = GameBeziPackets.ATRFORBEZI + " " + parameters.beziAtr.tostring();
@@ -151,7 +155,7 @@ class GameBezimienny
 		
 		if(player == -1)
 		{
-			foreach(pid in game.players)
+			foreach(pid in gameSystem.players)
 			{
 				sendPacket(pid, 1, paramsAtrB);
 				sendPacket(pid, 1, paramsEqB);
@@ -280,7 +284,6 @@ class GameBezimienny
 	
 	function onHit(killer, target)
 	{
-		print("KID " + killer + " Targt " + target);
 		if(target == system.bezimienny && killer > 0)
 		{
 			SoldierHitBezi(killer, target)
@@ -291,7 +294,7 @@ class GameBezimienny
 	{
 		switch(system.state)
 		{
-		case GameState.WAIT:
+		case GameState.INIT:
 			
 			break;
 		case GameState.STARTED: 

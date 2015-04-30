@@ -182,10 +182,6 @@ function sscanfMulti(params, text)
 	local result;
 	while ( result == sscanf(params, text))
 	{
-		foreach(item in result)
-		{
-			print(item)
-		}
 		params = result.pop();
 		table.push(result);
 	}

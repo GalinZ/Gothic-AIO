@@ -39,24 +39,34 @@ function onTakeDebug(jakies_zmienne)
 }
 function onDropDebug(jakies_zmienne)
 {
+
 }
 
 //CHAT
 function onCommandDebug(pid, command, params)
 {
+
 }
 function onAdminCommandDebug(pid, command)
 {
+
 }
 function onMessageDebug(pid, message)
 {
+
 }
 //Timers
 function onUpdateDebug() // 100ms
 {
+
 }
 function onTimerEndDebug(object)
 {
+
+}
+function onInitDebug()
+{
+
 }
 
 eventsPacket.Add(onPacketDebug);
@@ -75,3 +85,14 @@ eventsAdminCmd.Add(onAdminCommandDebug);
 eventsMessage.Add(onMessageDebug);
 eventsUpdate.Add(onUpdateDebug);
 eventsTimersEnd.Add(onTimerEndDebug);
+
+class ABC
+{
+	a = null;
+	constructor(_a)
+	{
+
+	}
+	
+}
+

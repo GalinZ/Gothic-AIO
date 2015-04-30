@@ -47,7 +47,7 @@ class GameBezimienny
 	function onInit()
 	{
 		system ={
-			state = GameState.WAIT,
+			state = GameState.INIT,
 			bezimiennyID = -1,
 			gameTime = -1,
 			
@@ -230,7 +230,6 @@ class GameBezimienny
 				GetStandarHeroAttributes(GameBeziTeams.BEZI, packet[1]);
 				break;
 			case GameBeziPackets.IDOFBEZI:
-				print("Nowy bezi : " + packet[1]);
 				if(IAmBezimienny() && system.bezimiennyID != packet[1].tointeger())
 				{
 					system.bezimiennyID = packet[1].tointeger();

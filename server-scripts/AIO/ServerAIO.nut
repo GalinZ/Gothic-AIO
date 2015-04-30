@@ -8,6 +8,7 @@ local DEBUG = true;
 
 dofile("server-scripts\\AIO\\Scripts\\AdditionalFunc.nut");
 dofile("server-scripts\\AIO\\Scripts\\EventHandler.nut");
+dofile("server-scripts\\AIO\\ListOfGames.nut");
 dofile("server-scripts\\AIO\\GameSystem.nut");
 
 eventsStart <- EventHandler();
@@ -32,7 +33,7 @@ eventsMessage <- EventHandler();
 eventsUpdate <- EventHandler();
 eventsTimersEnd <- EventHandler();
 
-game <- GameSystem();
+gameSystem <- GameSystem();
 
 function onPacket(pid, data)
 {
@@ -46,13 +47,12 @@ function onTick()
 function onJoin(id)
 {
 	sendPacket(id, 1, format("105 %d %d", id, getMaxSlots()));
-	//sendPacket(id, format("%d %d %d", GameSystemPacket.MY_DATA, id, getMaxSlots()));
-	game.AddPlayer(id);
+	gameSystem.AddPlayer(id);
 	eventsJoin.Call(id);
 }
 function onDisconnect(id, reason)
 {
-	game.RemovePlayer(id);
+	gameSystem.RemovePlayer(id);
 	eventsDisconect.Call(id, reason);
 }
 function onHit(pid, tid)
@@ -88,7 +88,6 @@ function onDrop(jakies_zmienne)
 //CHAT
 function onCommand(pid, command, params)
 {
-	game.onCommand(pid, command, params);
 	eventsCommand.Call(pid, command, params);
 }
 function onAdminCommand(pid, command)
@@ -112,9 +111,14 @@ function onTimerEnd(object)
 
 function onInit()
 {
-	setTimer(onUpdate, 100, true);
-	game.Init();
-	//game.LoadGame("Bezimienny");
+	//setTimer(onUpdate, 100, true);
+	setTimer(onUpdate, 3000, true);
+	gameSystem.Init();
+	//gameSystem.LoadGame("Bezimienny");
+	if(DEBUG)
+	{
+		onInitDebug();
+	}
 }
 
 print("");

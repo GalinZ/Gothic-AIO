@@ -1,5 +1,6 @@
 dofile("Multiplayer\\Script\\AIO\\Scripts\\AdditionalFunc.nut");
 dofile("Multiplayer\\Script\\AIO\\Scripts\\EventHandler.nut");
+dofile("Multiplayer\\Script\\AIO\\ListOfGames.nut");
 dofile("Multiplayer\\Script\\AIO\\GameSystem.nut");
 
 local DEBUG = true;
@@ -80,11 +81,10 @@ function onTimerEnd(object)
 	eventsTimersEnd.Call(object);
 }
 
-
 function onInit()
 {
 	setTimer(onUpdate, 100, true);
-};
+}
 
 
 if(DEBUG)

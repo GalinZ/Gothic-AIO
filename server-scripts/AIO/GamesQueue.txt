@@ -1,1 +1,3 @@
-Zajebista_Gra ezimienny Sioxn.txt 5 NULLs
+Zajebista_Gra1 Bezimienny Sen.txt 5 NULL 
+Zajebita_Gra2 Bezimienny Sen.txt 5 NULL 
+Zajebita_Gr3 Bezimienny Sen.txt 5 NULL 
