@@ -1,0 +1,74 @@
+Tworzenie modułu własnej gry.
+1) Pobrać całą strukturę plików z gita na swój komputer.
+2) W folderze 'AIO/Games' utworzyć\skopiować plik pod swoją grę(zarówno dla klienta jak i dla serwera).
+3) W folderze 'AIO/Games/Includes' utworzyć plik ze ścieżkami dofile bądź require do plików z ktrych będzię korzystała gra(w pliku z grą nie powinny znajdować się żadne ścieżki do innych plików)
+4) W folderze 'AIO'(dla obu) otworzyć plik 'ListOfGames.nut' i dopisać w niej obydwa powyższe pliki, oraz dodać grę do tablicy.
+5) Tworząc grę nie pisać constructora. Zamist tego zrobić 2 funkcje 
+- Init() Inicjującą wszystko (z Null na wartości)
+- Deinit( Deinicjuącą wszystko (z wartości na Null)
+6) Pisząc CallBacki najlpiej używać tych samych nazw które są podane na wiki, oraz tej samej ilości parametrów.
+7) Dopisać funkcję HookCallbacks która podłączy callbacki z klasy do eventów. np: eventsRespawn.Add("onRespawn", this); This w tym miejscu jest wymagane do poprawnego funkcjonowania
+8) Tworząc grę należy podzielić ją na 3 etapy.(Dla klienta jak i dla serwera)
+
+FAZA INIT:
+	Przypisanie wartości podstawowych
+	Pobranie wartości z dopiętych do grze parametrów*
+	Wysłanie graczom informacji wymuszającej uruchomienie Init()
+	Wysłanie graczom podstawowych informacji
+FAZA STARTED:	
+	Podpięcie Callbacków.
+	Wysłanie informacji o starcie gry gracozm.
+	Wyświetlenie Drawów, Przywołąnie obiektów itp
+FAZA ENDED:
+	Odpięcie callbacków
+	Przesłanie graczom wyników.	
+	Odpalić timer który po wywołaniu zdeinicjuje grę i usunie wszystkie Drawy, Timery, Textury, Voby itp.
+	
+Aby odpalić grę należy dodać do pliku w 'server-scripts/AIO/GamesQueue.txt'
+Nazwa_Własna_Dowolna NazwaGry NazwaPlikuZParametrami.txt IloscGraczy NazwaPlikuZDodatkami.txt
+Gdzie:
+	Nazwa_Własna_Dowolna - To będzie tytuł wyświetlanej gry podczas oczekiwania bądź głosowania wyborze mapy. Nazwa musi być zapisana jako jeden wyraz, ale w grze _ zostaną zastąpione na spacje.
+	NazwaGry - Dokładna nazwa gry takiej jaka znajduje się w w tablicu w pliku 'ListOfGames' (Może być wiele gier z tą samą podstawą gry w kolejce)
+	NazwaPlikuZParametrami.txt - Nazwa pliku z której zostaną pobrane podstawowe parametry do gry, to co w nim się ma znajdować zależne będzie od tego jak gra zostanie zapisana. Plik znajdować powinien się w AIO/Games/Parameters
+	IloscGraczy - Minimalna ilość graczy by odpalić gre, jesli podczas gry liczba zmniejszy się poniżej minimalnej, gra zostanie zakończona.
+	NazwaPlikuZDodatkami - Nazwa pliku z listą dodatków do załdowania gry. Mozna zamiast tego napisać NULL jeśli nie posiada. O dodatkach porozmawiamy w przyszłości.
+	
+np:
+Supcio_Gra Bezimienny BezimiennyDefault.txt 4 NULL 
+Bezimienny_Dodatkowe_Bronie Bezimienny BezimiennyHardMode.txt 4 Dodatkowe_Bronie.txt 
+
+Po wbiciu do gry system poszuka pierwszej odpowiedniej gry dla aktualnej liczby graczy(Dla testów warto napisać w liczbie graczy 1)
+
+Nazwy pakietów należy umieścić w enumie ponad klasą(Nie da się w klasie), Enum musi posiadać unikalną nazwę związaną z przeznaczoną mu grą np: GameBeziPackets. 
+Enum z pakietami w obu plikach powinien być taki sam.
+
+Aby ułatwić sobie pracę należy utworzyć dla klas takie właściwości(zmienne)
+Serwer: 
+	timers - wszystkie timery
+	system - własciwości gry które są pod funkcjonowanie systemu bardziej niż na wygląd gry. Np: ListaGraczy, Druzyny, ObiektOdliczajacyCzas
+	parameters - własciwości gry które powinny móc być zmieniane przez plik z parametrami. Np: czasRundy, parametry klas postci, ilośćPunktów
+	events - własne funcje które mogę zostać wywołane np w jakimś dodatku dzięki eventom - o tym kiedy indziej
+Klient
+	timers - wszystkie timery
+	draws - wszystkie drawy
+	textures - wszystkie tekstury
+	vobs - wszystkie voby
+	system - tablica parameters raczej nie jest potrzebna w tym wypadku, dlatego wszystkie zmienne globalne wrzucamy tutaj.
+	events - tak jak wyżej.
+	
+timers, draws, textures i vobs pomogom nam w czyszczeniu gry po jej zakończeniu.
+Wystarczy napisać np 
+foreach(item in timers)
+{
+	killtimer(item);
+}
+
+Jesli chcemy dopisać klasę pomocnicza, umieszczamy ją w folderze 'AIO/Scripts'
+Jeśli obiekt klasy posiada timery, drawy, textury, voby, w wypadku jej usunięcia należy dopisać usuwanie owych elementów.
+Jeśli klasa znajduje się zarówno po stronie klienta i serwera, ale nie posiadają tych samych funkcjonalności, zamiast usuwać zbędny kod nalezy do zakomentowąć i podpisać gdzie jest wykorzystywany.
+Bardzo sie przydaje to gdy dokonujemy zmiany w 1 pliku i chcemy tą zmianę w 2. (Mozna wykorzystać do tego program winmerge który porówna obydwa pliki)
+
+Pisząc kod zalecałbym pisanie wszystkiego po Angielsku
+Stosować pełne nazwy funkcji i zmiennych aby ktoś kto przegląda kod bezproblemu mógł się z nim przyswoić.
+Grę powinno pisać się tak aby nie trzeba było jej edytować w przyszłości, zamiast tego można było wprowadzać dodatki bądź parametry ustawiając rozgrywkę na taką jaką chcemy.
+
