@@ -3,7 +3,7 @@ print("DEBUG MODE");
 function onRenderDebug()
 {
 }
-function onPacketDebug(data)
+function onPacketDebug(packetID, data)
 {
 }
 //PLAYER

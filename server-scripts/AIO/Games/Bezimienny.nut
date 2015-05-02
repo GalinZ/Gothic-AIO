@@ -2,16 +2,16 @@ print("LOAD: GAME BEZIMIENNY");
 
 enum GameBeziPackets
 {
-	EQFORSOLDIER = 1001,
-	EQFORBEZI = 1002,
-	ATRFORSOLDIER = 1003,
-	ATRFORBEZI = 1004,
-	IDOFBEZI = 1005,
-	UPDATESCORE = 1006,
-	STARTGAME = 1007,
-	SENDTIME = 1008
+	EQFORSOLDIER = 1001,	//S->C
+	EQFORBEZI = 1002,		//S->C
+	ATRFORSOLDIER = 1003,	//S->C
+	ATRFORBEZI = 1004,		//S->C
+	IDOFBEZI = 1005,		//S->C
+	UPDATESCORE = 1006,		//S->C
+	GAMESTART = 1007,		//S->C
+	GAMEEND = 1008,			//S->C
+	SENDTIME = 1009,		//S->C
 }
-
 
 enum GameBeziFuncs
 {
@@ -20,10 +20,9 @@ enum GameBeziFuncs
 	SOLDIER_HIT_BEZI
 }
 
-class GameBezimienny
+class GameBezimienny extends StandardProperties
 {
 	//O F F
-	timers = null;
 	system = null;
 	events = null;
 	parameters = null;
@@ -74,12 +73,14 @@ class GameBezimienny
 		GameInitPlayers();
 	}
 		
-	function DeInit()
-	{
-		timers = null;
+	function deinit()
+	{		
+		base.destroyProperties();
 		system = null;
 		events = null;
 		parameters = null;
+
+		unhookCallbacks();
 	}
 	
 	function StandardFunctions()
@@ -192,12 +193,34 @@ class GameBezimienny
 	//G A M E ___ S T A R T 
 	function GameStart()
 	{
-		HookCallbacks();
+		hookCallbacks();
 		system.gameTime.Start();
-		SendPacketToAll(format("%d XXX", GameBeziPackets.STARTGAME), 2);
+		SendPacketToAll(format("%d XXX", GameBeziPackets.GAMESTART), 2);
 		timers.scoreboard <- setTimerClass(this, "SendScroreBoard", 3000, true);
 		ChooseBezimienny();
 		SendScroreBoard();
+	}
+	
+	function GameEnd()
+	{
+		
+		local podium = 1;
+		local message = format("%d %d %s(%d)", GameBeziPackets.GAMEEND, podium, system.players[0].name, system.players[0].id)
+		local lastPoints = system.players[0].GetPoints();
+		
+		for(local i = 1; i< system.players.len(); i++)
+		{
+			if(lastPoints != system.players[i].GetPoints())
+			{
+				if(++podium > 3)
+				{
+					break;
+				}
+			}
+			lastPoints = system.players[i].GetPoints();
+			message += format(" %d %s(%d)", podium, system.players[i].name, system.players[i].id)			
+		}
+		SendPacketToAll(message);
 	}
 	
 	//G A M E ___ L O G I C
@@ -238,8 +261,9 @@ class GameBezimienny
 	function AddPoints(id, value)
 	{
 		system.players[GetIndexPlayer(id)].SetPoints(value, "+");
+		system.players.sort(@(a,b) -(a.GetPoints() <=> b.GetPoints()));
 	}
-	
+		
 	function SendScroreBoard()
 	{
 		local packet = GameBeziPackets.UPDATESCORE.tostring();
@@ -252,13 +276,22 @@ class GameBezimienny
 	}
 
 	//C A L L B A C K S
-	function HookCallbacks()
+	function hookCallbacks()
 	{
 		eventsJoin.Add("onJoin", this);
 		eventsDisconect.Add("onDisconnect", this);
 		eventsHit.Add("onHit", this);
 		eventsDie.Add("onDie", this);
 		eventsTimersEnd.Add("onTimerEnd", this);
+	}
+	
+	function unhookCallbacks()
+	{
+		eventsJoin.Remove("onJoin", this);
+		eventsDisconect.Remove("onDisconnect", this);
+		eventsHit.Remove("onHit", this);
+		eventsDie.Remove("onDie", this);
+		eventsTimersEnd.Remove("onTimerEnd", this);
 	}
 	
 	function onDie(victim, killer)
@@ -295,10 +328,8 @@ class GameBezimienny
 		switch(system.state)
 		{
 		case GameState.INIT:
-			
 			break;
 		case GameState.STARTED: 
-		
 			break;
 		}
 	}
@@ -329,7 +360,7 @@ class GameBezimienny
 	{
 		if(object == system.gameTime)
 		{
-			sendMessageToAll(0, 255, 0, "Gra skończona");
+			GameEnd();
 		}
 	}	
 }

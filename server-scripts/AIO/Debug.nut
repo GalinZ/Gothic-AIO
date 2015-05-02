@@ -4,7 +4,7 @@ print("#  DEBUG   MODE  #");
 print("##################");
 print("");
 
-function onPacketDebug(pid, data)
+function onPacketDebug(pid, packetID, data)
 {
 }
 function onTickDebug()
@@ -86,13 +86,21 @@ eventsMessage.Add(onMessageDebug);
 eventsUpdate.Add(onUpdateDebug);
 eventsTimersEnd.Add(onTimerEndDebug);
 
-class ABC
+class ABC extends StandardProperties
 {
 	a = null;
 	constructor(_a)
 	{
-
+		a = _a;
 	}
 	
+	function del()
+	{
+		this = null;
+	}
+	
+	function draw()
+	{
+		print("X"+a);
+	}
 }
-

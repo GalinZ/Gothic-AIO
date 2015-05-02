@@ -7,14 +7,15 @@ enum GameBeziTeams
 
 enum GameBeziPackets
 {
-	EQFORSOLDIER = 1001,
-	EQFORBEZI = 1002,
-	ATRFORSOLDIER = 1003,
-	ATRFORBEZI = 1004,
-	IDOFBEZI = 1005,
-	UPDATESCORE = 1006,
-	STARTGAME = 1007,
-	SENDTIME = 1008,
+	EQFORSOLDIER = 1001,	//S->C
+	EQFORBEZI = 1002,		//S->C
+	ATRFORSOLDIER = 1003,	//S->C
+	ATRFORBEZI = 1004,		//S->C
+	IDOFBEZI = 1005,		//S->C
+	UPDATESCORE = 1006,		//S->C
+	GAMESTART = 1007,		//S->C
+	GAMEEND = 1008,			//S->C
+	SENDTIME = 1009,		//S->C
 }
 
 enum GameBeziFuncs
@@ -24,29 +25,18 @@ enum GameBeziFuncs
 	SOLDIER_HIT_BEZI
 }
 
-class GameBezimienny
+class GameBezimienny extends StandardProperties
 {
-	draws = null;
-	textures = null;
-	timers = null;
-	vobs = null;
 	system = null;
 	events = null;
 	
-	constructor()
-	{
-		draws ={};
-		textures ={};
-		timers ={};
-		vobs ={};
-		system ={	state = GameState.OFF};
-		events ={};
-	}
-	
 	//I N I T 
-	function onInit()
+	function Init()
 	{
+		base.constructor();
+		events ={};
 		system ={
+			base.constructor()
 			state = GameState.INIT,
 			bezimiennyID = -1,
 			gameTime = -1,
@@ -61,7 +51,16 @@ class GameBezimienny
 		
 		system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
 		CreateScoreBoard();
+
+		hookCallbacksInit()
 	} 
+	
+	function DeInit()
+	{
+		system = null;
+		events = null;
+		base.destroyProperties();
+	}
 	//W A I T ___ F O R  ___ P A R A M S
 	function GetStandardEquipment(forWho, params)
 	{
@@ -132,16 +131,10 @@ class GameBezimienny
 	function GameStart()
 	{
 		system.state = GameState.STARTED;
-		HookCallbacks();
+		hookCallbacks();
 		
 		LoadHero();
 		system.gameTimer.Start();
-	}
-	
-	function HookCallbacks()
-	{
-		eventsRespawn.Add("onRespawn", this);
-		eventsDie.Add("onDie", this);
 	}
 	
 	function GameEnd()
@@ -206,55 +199,72 @@ class GameBezimienny
 
 	function IAmBezimienny()
 	{
-		return system.bezimiennyID == game.myId;
+		return system.bezimiennyID == gameSystem.myId;
 	}
 	
 	// CALLBACKS
-	function onPacket(data)
+	function hookCallbacksInit()
 	{
-		local packet = sscanf("ds", data);
-		if (packet)
+		eventsPacket.Add("onPacket", this);
+	}
+	
+	function hookCallbacks()
+	{
+		eventsRespawn.Add("onRespawn", this);
+		eventsDie.Add("onDie", this);
+	}
+	
+	function unhookCallbacks()
+	{
+		eventsPacket.Add("onPacket", this);
+		eventsRespawn.Remove("onRespawn", this);
+		eventsDie.Remove("onDie", this);
+	}
+
+	function onPacket(packetID, data)
+	{
+		switch(packetID)
 		{
-			switch(packet[0])
+		case GameBeziPackets.EQFORSOLDIER:
+			GetStandardEquipment(GameBeziTeams.SOLDIERS, data);
+			break;
+		case GameBeziPackets.EQFORBEZI:
+			GetStandardEquipment(GameBeziTeams.BEZI, data);
+			break;
+		case GameBeziPackets.ATRFORSOLDIER:
+			GetStandarHeroAttributes(GameBeziTeams.SOLDIERS, data);
+			break;
+		case GameBeziPackets.ATRFORBEZI:
+			GetStandarHeroAttributes(GameBeziTeams.BEZI, data);
+			break;
+		case GameBeziPackets.IDOFBEZI:
+			if(IAmBezimienny() && system.bezimiennyID != data.tointeger())
 			{
-			case GameBeziPackets.EQFORSOLDIER:
-				GetStandardEquipment(GameBeziTeams.SOLDIERS, packet[1]);
-				break;
-			case GameBeziPackets.EQFORBEZI:
-				GetStandardEquipment(GameBeziTeams.BEZI, packet[1]);
-				break;
-			case GameBeziPackets.ATRFORSOLDIER:
-				GetStandarHeroAttributes(GameBeziTeams.SOLDIERS, packet[1]);
-				break;
-			case GameBeziPackets.ATRFORBEZI:
-				GetStandarHeroAttributes(GameBeziTeams.BEZI, packet[1]);
-				break;
-			case GameBeziPackets.IDOFBEZI:
-				if(IAmBezimienny() && system.bezimiennyID != packet[1].tointeger())
-				{
-					system.bezimiennyID = packet[1].tointeger();
-					LoadHero();
-				}
-				else
-				{
-					system.bezimiennyID = packet[1].tointeger();
-					if(IAmBezimienny())
-					{
-						BecomeTheBezimienny();
-					}
-				}
-				break;
-			case GameBeziPackets.SENDTIME:
-				system.gameTimer.SetTime(packet[1].tointeger());
-				break;
-			case GameBeziPackets.UPDATESCORE:
-				UpdateScore(packet[1]);
-				break;
-			case GameBeziPackets.STARTGAME:
-				GameStart();
-				break;			
+				system.bezimiennyID = data.tointeger();
+				LoadHero();
 			}
-        }
+			else
+			{
+				system.bezimiennyID = data.tointeger();
+				if(IAmBezimienny())
+				{
+					BecomeTheBezimienny();
+				}
+			}
+			break;
+		case GameBeziPackets.SENDTIME:
+			system.gameTimer.SetTime(data.tointeger());
+			break;
+		case GameBeziPackets.UPDATESCORE:
+			UpdateScore(data);
+			break;
+		case GameBeziPackets.GAMESTART:
+			GameStart();
+			break;
+		case GameBeziPackets.GAMEEND:
+			ShowMatchResult(data);
+			timers.sameEnd = setTimerClass(gameSystem, "serverMessage", 30 * 1000, true)
+		}
 	}
 	
 	function onRespawn()

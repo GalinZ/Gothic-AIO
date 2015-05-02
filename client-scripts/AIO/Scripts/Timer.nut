@@ -4,7 +4,7 @@ enum TimerModes
 	LENGHT	
 }
 
-class Timer
+class Timer extends StandardProperties
 {
 	mode = null;
 	draw = null;

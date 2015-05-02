@@ -91,6 +91,8 @@ class EventHandler
 			}
 			catch(error)
 			{
+				print(error + " Usunieto " + item.caller + " " + item.func);
+				print("Typ " + typeof(item.caller) + " " + typeof(item.func));
 				listOfFunc.remove(i--);
 			}
 		}

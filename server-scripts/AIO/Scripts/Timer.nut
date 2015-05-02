@@ -1,10 +1,12 @@
+print("LOAD: TIMER");
+
 enum TimerModes
 {
 	TOZERO,
 	LENGHT	
 }
 
-class Timer
+class Timer extends StandardProperties
 {
 	mode = null;
 	//draw = null; Client only

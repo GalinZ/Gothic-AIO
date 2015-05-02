@@ -58,8 +58,9 @@ class EventHandler
 		for(local i = 0; i < listOfFunc.len(); i++)
 		{	
 			local item = listOfFunc[i];
-			try
+		/*	try
 			{
+		*/	
 				if(item.caller == null)
 				{
 				if(p1 == null){	item.func();}
@@ -88,11 +89,14 @@ class EventHandler
 					else if(p10 == null){item.caller[item.func](p1,p2,p3,p4,p5,p6,p7,p8,p9);}
 					else { item.caller[item.func](p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)}
 				}
-			}
+		/*	}
 			catch(error)
 			{
+				print(error + " Usunieto " + item.caller + " " + item.func);
+				print("Typ " + typeof(item.caller) + " " + typeof(item.func));
 				listOfFunc.remove(i--);
 			}
+		*/	
 		}
 	}
 	

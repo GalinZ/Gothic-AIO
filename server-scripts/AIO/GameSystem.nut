@@ -1,5 +1,12 @@
 print("LOAD: GAME SYSTEM");
 
+enum VoteModes
+{
+	KICK,
+	SELECTMAP,
+	ENDGAME,
+}
+
 enum GameState
 {
 	OFF,
@@ -15,11 +22,13 @@ enum GameSystemPacket
 	START_GAME = 103,	//S->C
 	END_GAME = 104, 	//S->C
 	MY_DATA = 105,		//S->C
-	NEW_VOTE = 106,		//S->C
-	PLAYER_VOTE = 107,	//C->S
+	VOTE_NEW = 106,		//S->C
+	VOTE_PLAYER = 107,	//C->S
+	VOTE_UPDATE = 108,	//S->C
+	VOTE_END = 109,		//S->C
 }
 
-class GameSystem
+class GameSystem extends StandardProperties
 {
 	players = null;
 	globalEvents = null;
@@ -27,6 +36,8 @@ class GameSystem
 	gamesQueue = null;
 	gameTimer = null;
 	isGameInit = null;
+	voting = null;
+	
 	static waitForInitGame = 20000;
 	static waitForStartGame = 10000;
 	
@@ -72,11 +83,20 @@ class GameSystem
 	
 	function CreateGame(name)
 	{
-		if(name in listOfGame)
+		local gameToCreate;
+		foreach(game in gamesQueue)
+		{
+			if(game.ownName == name)
+			{
+				gameToCreate = game;
+			}
+		}
+		
+		if(gameToCreate)
 		{
 			print(format("Zaladowano gre %s", name));
 			currGame = name;
-			listOfGame[name].OnInit();
+			listOfGame[gameToCreate.gameName].Init();
 		}
 		else
 		{
@@ -127,6 +147,13 @@ class GameSystem
 		}
 	}
 
+	function EndVote()
+	{
+		if(voting)
+		{
+			voting = voting.destructor();
+		}
+	}
 //	C A L L B A C K S
 	function hookCallbacks()
 	{
@@ -134,9 +161,52 @@ class GameSystem
 		eventsTimersEnd.Add("onTimerEnd", this);
 		eventsAdminCmd.Add("onAdminCommand", this);
 		eventsPacket.Add("onPacket", this);
+	}
+	
+	function unhookCallbacks()
+	{
+		eventsCommand.Remove("onCommand", this);
+		eventsTimersEnd.Remove("onTimerEnd", this);
+		eventsAdminCmd.Remove("onAdminCommand", this);
+		eventsPacket.Remove("onPacket", this);
+	}
+	
+	function onCommand(pid, command, params)
+	{
+		switch(command)
+		{
+		case "kick":
+			if(voting == null)
+			{
+				local idToKick = params.tointeger();
+				if((idToKick > 0 || (idToKick == 0 && params == "0")) && isConnected(idToKick))
+				{
+					voting = Vote(pid, VoteModes.KICK, idToKick);
+				}
+			}
+			break;
+		case "switch":
+			if(voting == null)
+			{
+				local isGame = false;
+				foreach(game in gamesQueue)
+				{
+					if(game.ownName == params)
+					{
+						isGame = true;
+					}
+				}
+				
+				if(isGame)
+				{
+					voting = Vote(pid, VoteModes.SELECTMAP, params);
+				}
+			}
+			break
+		}
 	}	
 
-	function onCommand(pid, command, params)
+	function onAdminCommand(pid, command)
 	{
 		switch(command)
 		{
@@ -146,13 +216,7 @@ class GameSystem
 		case "end":
 			listOfGame[currGame].DeInit();
 			break;
-		default: break;
 		}
-	}	
-
-	function onAdminCommand(pid, command)
-	{
-	
 	}
 	
 	function onTimerEnd(object)
@@ -161,19 +225,21 @@ class GameSystem
 		{
 			if(isGameInit)
 			{
+/*
 				listOfGame[currGame].Init();
 				gameTimer.SetTime(waitForStartGame);
 				gameTimer.Start();
 				isGameInit = true;
+*/
 			}
 			else
 			{
-				listOfGame[currGame].GameStart();
+//				listOfGame[currGame].GameStart();
 			}
 		}
 	}	
 
-	function onPacket(pid, data)
+	function onPacket(pid, packetID, data)
 	{
 
 	}
@@ -189,7 +255,7 @@ class Game
 	
 	constructor(_ownName, _gameName, _params, _minPlayers, _addons)
 	{
-		ownName = _ownName;
+		ownName = ConvertName(_ownName, "_", " ");
 		gameName= _gameName;
 		params 	= _params;
 		minPlayers 	= _minPlayers;
@@ -235,15 +301,9 @@ class Game
 	}
 }
 
-enum VOTEMODES
+class Vote extends StandardProperties
 {
-	KICK,
-	SELECTMAP,
-	ENDGAME,
-}
-
-class Vote
-{
+	initiator = null
 	votes = null;
 	playersVoting = null;
 	mode = null;
@@ -251,67 +311,111 @@ class Vote
 	
 	constructor (_id, _mode, _params)
 	{
+		base.constructor();
+		initiator = _id;
 		mode = _mode;
 		params = _params;
-		votes = [];
+		votes ={
+			positive= [],
+			negative= [],
+			};
 		playersVoting = gameSystem.players.len();
 		
-		local message = format("%d %s", GameSystemPacket.NEW_VOTE, convertText(_id, _mode, _params));
+		hookCallbacks();
+		
+		local message = format("%d %s", GameSystemPacket.VOTE_NEW, convertText());
 		gameSystem.SendPacketToAll(message);
 	}
 	
-	function convertText(_id, _mode, _params)
+	function destructor()
+	{
+		base.destroyProperties();
+		unhookCallbacks();
+		return null;
+	}
+	
+	function convertText()
 	{
 		switch(mode)
 		{
-		case VOTEMODES.KICK:
-			return format("%s(%d) wants kick from game %s(%d)", getpalyername(id), id, getpalyername(params), params);
-		case VOTEMODES.SELECTMAP:
-			return format("%s(%d) wants to change mode on %s", getpalyername(id), id, params);
+		case VoteModes.KICK:
+			return format("%s(%d) wants to kick %s(%d) from the game ", getPlayerName(initiator), initiator, getPlayerName(params), params);
+		case VoteModes.SELECTMAP:
+			return format("%s(%d) wants to change mode on %s", getPlayerName(initiator), initiator, params);
 		}
 	}
 	
 	function getVote(_id, _value)
 	{
-		local newVote ={id = id, value = value}
-		votes.push(newVote);
-		if(votes.len() >= gameSystem.players.len()) 
+		if(_value){	votes.positive.push(_id);}
+		else {		votes.negative.push(_id);}
+
+		local message = format("%d %d %d", GameSystemPacket.VOTE_UPDATE, votes.positive.len(), votes.negative.len() );
+		gameSystem.SendPacketToAll(message);
+		
+		if(votes.positive.len() + votes.negative.len() >= gameSystem.players.len()) 
 		{
-			vote
+			endVote();
 		}
 	}
 
-	function endVote()
+	function endVote(result = null)
 	{
-		local positiveVotes = 0;
-		foreach(item in votes)
+		if(result == null)
 		{
-			if(item.value)
+			//if(votes.positive.len() > votes.negative.len())
+			if(votes.positive.len() == gameSystem.players.len())
 			{
-				positiveVotes++;
-			}
-			else
-			{
-				positiveVotes--;
+				doCommand();
 			}
 		}
-		
-		if(positiveVotes >= 0)
+		else if(result)
 		{
 			doCommand();
 		}
+		
+		local message = format("%d X", GameSystemPacket.VOTE_END);
+		gameSystem.SendPacketToAll(message);
+		gameSystem.EndVote();
 	}
 	
 	function doCommand()
 	{
 		switch(mode)
 		{
-		case VOTEMODES.KICK:
-			sendMessageToAll(0x66, 0x33, 0x66, format("GameSystem: Player %s(%d) was kicked.", getpalyername(params), params));
+		case VoteModes.KICK:
+			sendMessageToAll(0x66, 0x33, 0x66, format("GameSystem: Player %s(%d) was kicked.", getPlayerName(params), params));
 			kick(params)
-		case VOTEMODES.SELECTMAP:
+		case VoteModes.SELECTMAP:
 			sendMessageToAll(0x66, 0x33, 0x66, format("The mode has been changed to: %s", params));
 			gameSystem.CreateGame(params);
+		}
+	}
+//	C A L L B A C K S
+	function hookCallbacks()
+	{
+		eventsPacket.Add("onPacket", this);
+	}
+	
+	function unhookCallbacks()
+	{
+		eventsPacket.Remove("onPacket", this);
+	}
+	
+	function onPacket(pid, packetID, data)
+	{
+		switch(packetID)
+		{
+		case GameSystemPacket.VOTE_PLAYER:
+			if(data.tointeger() == 1)
+			{
+				getVote(pid, true);
+			}
+			else
+			{
+				getVote(pid, false);
+			}
+			break;
 		}
 	}
 }

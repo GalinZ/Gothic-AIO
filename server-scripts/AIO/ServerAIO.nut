@@ -7,9 +7,11 @@ print("");
 local DEBUG = true;
 
 dofile("server-scripts\\AIO\\Scripts\\AdditionalFunc.nut");
+dofile("server-scripts\\AIO\\Scripts\\StandardProperties.nut");
 dofile("server-scripts\\AIO\\Scripts\\EventHandler.nut");
-dofile("server-scripts\\AIO\\ListOfGames.nut");
+dofile("server-scripts\\AIO\\Scripts\\Timer.nut");
 dofile("server-scripts\\AIO\\GameSystem.nut");
+dofile("server-scripts\\AIO\\ListOfGames.nut");
 
 eventsStart <- EventHandler();
 eventsEnd <- EventHandler();
@@ -37,7 +39,11 @@ gameSystem <- GameSystem();
 
 function onPacket(pid, data)
 {
-	eventsPacket.Call(pid, data);
+	local packet = sscanf("ds", data);
+	if (packet)
+	{
+		eventsPacket.Call(pid, packet[0], packet[1]);
+	}
 }
 function onTick()
 {
@@ -111,8 +117,7 @@ function onTimerEnd(object)
 
 function onInit()
 {
-	//setTimer(onUpdate, 100, true);
-	setTimer(onUpdate, 3000, true);
+	setTimer(onUpdate, 100, true);
 	gameSystem.Init();
 	//gameSystem.LoadGame("Bezimienny");
 	if(DEBUG)

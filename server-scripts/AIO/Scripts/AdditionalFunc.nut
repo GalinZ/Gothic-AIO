@@ -154,7 +154,7 @@ function readLine(handle)
     {
         local char = handle.readn('b');
         line += char.tochar();
-        
+		//print(char + " " + char.tochar())
         if (char == '\n')
 		{
 			return line
@@ -173,9 +173,9 @@ function SavePosition(id, path, additionalMessage = "")
 	writeToFile(path, text, "a");
 }
 
-
 function sscanfMulti(params, text)
 {
+	text = ConvertName(text, "\n", " ");
 	text += " protectionWord";
 	params += "s";
 	local table = [];
@@ -187,4 +187,3 @@ function sscanfMulti(params, text)
 	}
 	return table.len() ? table : null;
 }
-
