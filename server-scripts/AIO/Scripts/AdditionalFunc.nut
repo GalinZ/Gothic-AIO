@@ -39,7 +39,7 @@ function PerPoint(percent)
 };
 */
 
-//Przesy³anie Nazwy gracza przez pakiety
+//PrzesyÂ³anie Nazwy gracza przez pakiety
 function ConvertName(text, fromChar, toChar)
 {
 	local i = 0;
@@ -76,7 +76,7 @@ function ConvertName(text, fromChar, toChar)
 	return newText;
 }
 
-//System tworzenia timerów w klasach
+//System tworzenia timerÃ³w w klasach
 function setTimerClass(_inst, _func, _time, _repeat, _params = null)
 {
 	local object ={inst = _inst, func = _func , params = _params}
@@ -95,7 +95,7 @@ function classTimer(object)
 	}
 }
 
-//Funkcja losuj¹ca
+//Funkcja losujÂ¹ca
 function random(value1, value2 = null)
 {
 	if(value2 == null)
@@ -115,7 +115,7 @@ function random(value1, value2 = null)
 	}
 }
 
-//System plików
+//System plikÃ³w
 function writeToFile(path, text, mode)
 {
 	local myfile = file(path, mode);
@@ -169,7 +169,7 @@ function SavePosition(id, path, additionalMessage = "")
     local pos = getPosition(id);
 	local angle = 0;
 	local text = format("%d %d %d %d %s", pos.x, pos.y, pos.z, angle, additionalMessage)
-	print("Dodano pozycjê " + text)
+	print("Dodano pozycjÃª " + text)
 	writeToFile(path, text, "a");
 }
 
@@ -186,4 +186,53 @@ function sscanfMulti(params, text)
 		table.push(result);
 	}
 	return table.len() ? table : null;
+}
+
+
+function readParametersFile(path)
+{
+	local params ={};
+	local paramFile = file(path, "r");
+	do
+	{
+		local line = readLine(paramFile)
+		if(line)
+		{
+			local parts = sscanf("ss", line)
+			local headers = stringSplit(parts[0], "_");
+			local data = stringSplit(parts[1], " ");
+			if(headers.len() == 1 && data.len() == 1)
+			{
+				params[headers[0]] <- data[0];
+			}
+			else
+			{
+				local max = headers.len() >= data.len() ? headers.len() : data.len();
+				local title = [headers[0]]
+				params[title] <-{};
+				
+				local index = 0;
+				for(local i=1; i<max; i++)
+				{
+					if(headers.len() <= i)
+					{
+						params[title][index++] <- data[i]; 
+					}
+					else if(data.len() <= i)
+					{
+						params[title][headers[i]] <- null; 
+					}
+					else
+					{
+						params[title][headers[i]] <- data[i]; 
+					}
+				}
+			}
+		}
+		else
+		{
+			break;
+		}
+	}while(true)
+
 }
