@@ -28,7 +28,7 @@ function onRespawnDebug(pid)
 {
 }
 
-function onUnconsciousDebug(pid)
+function onUnconsciousDebug(pid, kid)
 {
 }
 function onStandUpDebug(pid)

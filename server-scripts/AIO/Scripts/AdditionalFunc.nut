@@ -178,6 +178,7 @@ function SavePosition(id, path, additionalMessage = "")
 	writeToFile(path, text, "a");
 }
 
+// Operacje na tekstach
 function sscanfMulti(params, text)
 {
 	text = convertName(text, "\n", " ");
@@ -192,7 +193,6 @@ function sscanfMulti(params, text)
 	}
 	return table.len() ? table : null;
 }
-
 
 function readParameterFile(path)
 {
@@ -306,4 +306,46 @@ function convertToNumber(value)
 	{
 		return value;
 	}
+}
+
+// Wywo³anie funkcji u klienta
+function getStringFunction(func, ...)
+{
+	local msg = "";
+	if(typeof(func) == "string")
+	{
+		msg = func + "(";
+		for(local i = 0; i < vargv.len(); ++i)
+		{
+			if (i == 0)
+			{
+				if (typeof(vargv[i]) == "string")
+				{
+					msg += "\"" + vargv[i] + "\"";
+				}
+				else
+				{
+					msg += vargv[i];
+				}
+			}
+			else
+			{
+				if (typeof(vargv[i]) == "string")
+				{
+					msg +=  "," + "\"" + vargv[i] + "\"";
+				}
+				else
+				{
+					msg += "," + vargv[i];
+				}
+			}
+		}		
+		msg += ");";
+	}
+	return msg;
+}
+
+function callClientFunction(pid, packetID, fullFunc)
+{
+	sendPacket(pid, RELIABLE_ORDERED, packetID + " " + fullFunc);
 }

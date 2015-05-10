@@ -52,7 +52,7 @@ function onTick()
 //PLAYER
 function onJoin(id)
 {
-	sendPacket(id, 1, format("105 %d %d", id, getMaxSlots()));
+	sendPacket(id, 1, format("105 %d %d %d", id, getMaxSlots(), random(100)));
 	gameSystem.AddPlayer(id);
 	eventsJoin.Call(id);
 }
@@ -74,9 +74,10 @@ function onRespawn(pid)
 	eventsRespawn.Call(pid);
 }
 
-function onUnconscious(pid)
+function onUnconscious(pid, kid)
 {
-
+	print("P " + pid + " K " + kid)
+	eventsUnconscious.Call(pid, kid)
 }
 function onStandUp (pid)
 {

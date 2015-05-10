@@ -73,8 +73,15 @@ class HeroEquipment
 		}
 	}
 
-	function covertString(params)
+	function convert(params)
 	{	
+		local newItems = sscanfMulti("sddd", params)
+		foreach(item in newItems)
+		{
+			Add(item[0], item[1], item[2], item[3]);
+		}
+		
+		/*
 		do
 		{
 			local item = sscanf("sddds", params);
@@ -93,6 +100,7 @@ class HeroEquipment
 				break;
 			}
 		}while(true)
+		*/
 	}
 	
 	function getFromFile(path)

@@ -306,3 +306,45 @@ function convertToNumber(value)
 		return value;
 	}
 }
+
+// Wywo³anie funkcji u klienta
+function getStringFunction(func, ...)
+{
+	local msg = "";
+	if(typeof(func) == "string")
+	{
+		msg = func + "(";
+		for(local i = 0; i < vargv.len(); ++i)
+		{
+			if (i == 0)
+			{
+				if (typeof(vargv[i]) == "string")
+				{
+					msg += "\"" + vargv[i] + "\"";
+				}
+				else
+				{
+					msg += vargv[i];
+				}
+			}
+			else
+			{
+				if (typeof(vargv[i]) == "string")
+				{
+					msg +=  "," + "\"" + vargv[i] + "\"";
+				}
+				else
+				{
+					msg += "," + vargv[i];
+				}
+			}
+		}		
+		msg += ");";
+	}
+	return msg;
+}
+
+function callServerFunction(packetID, fullFunc)
+{
+	sendPacket(RELIABLE_ORDERED, packetID + " " + fullFunc);
+}

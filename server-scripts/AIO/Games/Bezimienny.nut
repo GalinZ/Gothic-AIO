@@ -2,15 +2,15 @@ print("LOAD: GAME BEZIMIENNY");
 
 enum GameBeziPackets
 {
+	BEZICALLFUNC = 1000,	//S<->C
 	EQFORSOLDIER = 1001,	//S->C
 	EQFORBEZI = 1002,		//S->C
 	ATRFORSOLDIER = 1003,	//S->C
 	ATRFORBEZI = 1004,		//S->C
-	IDOFBEZI = 1005,		//S->C
-	UPDATESCORE = 1006,		//S->C
-	GAMESTART = 1007,		//S->C
-	GAMEEND = 1008,			//S->C
-	SENDTIME = 1009,		//S->C
+	UPDATESCORE = 1005,		//S->C
+	GAMESTART = 1006,		//S->C
+	GAMEEND = 1007,			//S->C
+	SENDTIME = 1008,		//S->C
 }
 
 enum GameBeziFuncs
@@ -41,7 +41,8 @@ class GameBezimienny extends StandardProperties
 			soldierEq = HeroEquipment(),
 			soldierAtr = HeroAttributes(),									
 			beziEq = HeroEquipment(),
-			beziAtr = HeroAttributes()
+			beziAtr = HeroAttributes(),
+			spawns = Spawns(),
 		};
 		
 		parameters ={
@@ -85,6 +86,7 @@ class GameBezimienny extends StandardProperties
 				system.beziAtr.getFromFile(var);
 				break;
 			case "spawns":
+				system.spawns.getFromFile(var);
 				break;
 			//Other parameters will be assigned to table of parameters
 			default:
@@ -162,6 +164,11 @@ class GameBezimienny extends StandardProperties
 		local paramsAtrS = GameBeziPackets.ATRFORSOLDIER + " " + system.soldierAtr.tostring();
 		local paramsEqS = GameBeziPackets.EQFORSOLDIER + " " + system.soldierEq.tostring();
 		
+		local allSpawns = GameBeziPackets.BEZICALLFUNC + " " + getStringFunction("importSpawns", system.spawns.tostring())
+		
+		SendPacketToAll(format("%d %s", GameBeziPackets.BEZICALLFUNC, 
+			getStringFunction("importSpawns", system.spawns.tostring())));
+	
 		if(player == -1)
 		{
 			foreach(pid in gameSystem.players)
@@ -170,6 +177,7 @@ class GameBezimienny extends StandardProperties
 				sendPacket(pid, 1, paramsEqB);
 				sendPacket(pid, 1, paramsAtrS);
 				sendPacket(pid, 1, paramsEqS);
+				sendPacket(pid, 1, allSpawns);
 			}
 		}
 		else
@@ -178,6 +186,7 @@ class GameBezimienny extends StandardProperties
 			sendPacket(player, 1, paramsEqB);
 			sendPacket(player, 1, paramsAtrS);
 			sendPacket(player, 1, paramsEqS);
+			sendPacket(player, 1, allSpawns);
 		}
 	}
 	
@@ -195,12 +204,15 @@ class GameBezimienny extends StandardProperties
 	function SetNewBezimienny(id)
 	{
 		system.bezimienny = id;
-		SendPacketToAll(format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
+		SendPacketToAll(format("%d %s", GameBeziPackets.BEZICALLFUNC, 
+			getStringFunction("newBezimienny", system.bezimienny)));
+		//SendPacketToAll(format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
 	}
 	
 	//G A M E ___ S T A R T 
 	function GameStart()
 	{
+		system.state = GameState.STARTED;
 		hookCallbacks();
 		system.gameTime.Start();
 		SendPacketToAll(format("%d XXX", GameBeziPackets.GAMESTART), 2);
@@ -211,9 +223,8 @@ class GameBezimienny extends StandardProperties
 	
 	function GameEnd()
 	{
-		
 		local podium = 1;
-		local message = format("%d %d %s(%d)", GameBeziPackets.GAMEEND, podium, system.players[0].name, system.players[0].id)
+		local message = format("%d %s(%d)", podium, system.players[0].name, system.players[0].id)
 		local lastPoints = system.players[0].GetPoints();
 		
 		for(local i = 1; i< system.players.len(); i++)
@@ -228,7 +239,12 @@ class GameBezimienny extends StandardProperties
 			lastPoints = system.players[i].GetPoints();
 			message += format(" %d %s(%d)", podium, system.players[i].name, system.players[i].id)			
 		}
-		SendPacketToAll(message);
+		
+		//SendPacketToAll(message);
+		
+		SendPacketToAll(format("%d %s", GameBeziPackets.BEZICALLFUNC, 
+			getStringFunction("GameEnd", message)));
+			
 		unhookCallbacks();
 		gameSystem.endGame();
 	}
@@ -236,36 +252,36 @@ class GameBezimienny extends StandardProperties
 	//G A M E ___ L O G I C
 	function BeziKillSoldier(bezi, soldier)
 	{
-		AddPoints(bezi, system.points.killSoldier);
+		AddPoints(bezi, parameters.points.killSoldier);
 	}
 	
 	function SoldierKillBezi(soldier, bezi)
 	{
-		AddPoints(soldier, system.points.killBezi);
+		AddPoints(soldier, parameters.points.killBezi);
 		SetNewBezimienny(soldier);
 	}
 	
 	function SoldierHitBezi(soldier, bezi)
 	{
-		AddPoints(soldier, system.points.hitBezi);
+		AddPoints(soldier, parameters.points.hitBezi);
 	}
 	
 	function Suicide(victim)
 	{
 		if(victim == system.bezimienny)
 		{
-			AddPoints(victim, system.points.suicideBezi);
+			AddPoints(victim, parameters.points.suicideBezi);
 			ChooseBezimienny();
 		}
 		else
 		{
-			AddPoints(victim, system.points.suicide);
+			AddPoints(victim, parameters.points.suicide);
 		}
 	}
 	
 	function TeamKill(killer, victim)
 	{
-		AddPoints(killer, system.points.teamKill);
+		AddPoints(killer, parameters.points.teamKill);
 	}
 	
 	function AddPoints(id, value)
@@ -327,7 +343,7 @@ class GameBezimienny extends StandardProperties
 	
 	function onHit(killer, target)
 	{
-		if(target == system.bezimienny && killer > 0)
+		if(target == system.bezimienny && killer >= 0)
 		{
 			SoldierHitBezi(killer, target)
 		}
@@ -335,11 +351,14 @@ class GameBezimienny extends StandardProperties
 	
 	function onJoin(id)
 	{
+		system.players.push(PlayerParameters(id));
 		switch(system.state)
 		{
 		case GameState.INIT:
+			JoinBeforeStart(id)
 			break;
-		case GameState.STARTED: 
+		case GameState.STARTED:
+			JoinAfterStart(id)
 			break;
 		}
 	}
@@ -355,15 +374,20 @@ class GameBezimienny extends StandardProperties
 	
 	function JoinBeforeStart(id)
 	{
+		sendPacket(id, 2, format("%d Bezimienny" ,GameSystemPacket.INIT_GAME));
+		callClientFunction(id, GameBeziPackets.BEZICALLFUNC, getStringFunction("newBezimienny", system.bezimienny));
 		GameStartSendParameters(id);
 	}
 	
 	function JoinAfterStart(id)
 	{
+		sendPacket(id, 2 , format("%d Bezimienny" ,GameSystemPacket.INIT_GAME));
+		callClientFunction(id, GameBeziPackets.BEZICALLFUNC, getStringFunction("newBezimienny", system.bezimienny));
 		GameStartSendParameters(id);
-		sendPacket(id, 2, format("%d %d", GameBeziPackets.IDOFBEZI, system.bezimienny));
+		
 		sendPacket(id, 1, format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()))
 		SendScroreBoard();
+		sendPacket(id, 1, format("%d XXX", GameBeziPackets.GAMESTART));
 	}
 
 	function onTimerEnd(object)

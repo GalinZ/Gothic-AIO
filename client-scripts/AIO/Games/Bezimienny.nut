@@ -7,15 +7,15 @@ enum GameBeziTeams
 
 enum GameBeziPackets
 {
+	BEZICALLFUNC = 1000,	//S<->C
 	EQFORSOLDIER = 1001,	//S->C
 	EQFORBEZI = 1002,		//S->C
 	ATRFORSOLDIER = 1003,	//S->C
 	ATRFORBEZI = 1004,		//S->C
-	IDOFBEZI = 1005,		//S->C
-	UPDATESCORE = 1006,		//S->C
-	GAMESTART = 1007,		//S->C
-	GAMEEND = 1008,			//S->C
-	SENDTIME = 1009,		//S->C
+	UPDATESCORE = 1005,		//S->C
+	GAMESTART = 1006,		//S->C
+	GAMEEND = 1007,			//S->C
+	SENDTIME = 1008,		//S->C
 }
 
 enum GameBeziFuncs
@@ -45,7 +45,7 @@ class GameBezimienny extends StandardProperties
 			soldierAtr = null,
 			beziAtr = null,
 			gameTimer = Timer(TimerModes.TOZERO),
-			spawns = [],
+			spawns = Spawns(),
 		}
 		
 		draws.gameTimer <- system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
@@ -65,11 +65,11 @@ class GameBezimienny extends StandardProperties
 	{
 		if(forWho == GameBeziTeams.SOLDIERS)
 		{
-			system.soldierEq.covertString(params);
+			system.soldierEq.convert(params);
 		}
 		else if(forWho == GameBeziTeams.BEZI)
 		{
-			system.beziEq.covertString(params);
+			system.beziEq.convert(params);
 		}	
 	}
 	
@@ -94,6 +94,11 @@ class GameBezimienny extends StandardProperties
 		}
 	}
 
+	function importSpawns(data)
+	{
+		system.spawns.convert(data);
+	}
+	
 	function LoadHero()
 	{
 		if(IAmBezimienny())
@@ -106,6 +111,8 @@ class GameBezimienny extends StandardProperties
 			system.soldierAtr.UpdateHero();
 			system.soldierEq.EquipHero();
 		}
+		
+		system.spawns.respawn();
 	}
 
 	function CreateScoreBoard()
@@ -144,16 +151,9 @@ class GameBezimienny extends StandardProperties
 			draws[index] <- createDraw(text, "FONT_OLD_20_WHITE_HI.TGA",
 					3000, GetLinePos(2500, 25, i), 255, 255, 255);
 			setDrawVisible(draws[index], true);
-		}
-		
+		}		
 		unhookCallbacks();
-	}
-	
-	function BecomeTheBezimienny()
-	{
-		completeHeal();
-		system.beziAtr.UpdateHero();
-		system.beziEq.EquipHero();
+		timers.sameEnd <- setTimerClass(gameSystem, "endGame", 5000, false)
 	}
 	
 	function UpdateScore(scores)
@@ -189,11 +189,34 @@ class GameBezimienny extends StandardProperties
 		}
 	}
 
+	function BecomeTheBezimienny()
+	{
+		completeHeal();
+		system.beziAtr.UpdateHero();
+		system.beziEq.EquipHero();
+	}
+	
 	function IAmBezimienny()
 	{
 		return system.bezimiennyID == gameSystem.myId;
 	}
 	
+	function newBezimienny(beziid)
+	{
+		if(IAmBezimienny() && system.bezimiennyID != beziid)
+		{
+			system.bezimiennyID = beziid;
+			LoadHero();
+		}
+		else
+		{
+			system.bezimiennyID = beziid;
+			if(IAmBezimienny())
+			{
+				BecomeTheBezimienny();
+			}
+		}
+	}
 	// CALLBACKS
 	function hookCallbacksInit()
 	{
@@ -217,6 +240,9 @@ class GameBezimienny extends StandardProperties
 	{
 		switch(packetID)
 		{
+		case GameBeziPackets.BEZICALLFUNC:
+			compilestring(data)();
+            break;
 		case GameBeziPackets.EQFORSOLDIER:
 			getStandardEquipment(GameBeziTeams.SOLDIERS, data);
 			break;
@@ -229,21 +255,6 @@ class GameBezimienny extends StandardProperties
 		case GameBeziPackets.ATRFORBEZI:
 			getStandarHeroAttributes(GameBeziTeams.BEZI, data);
 			break;
-		case GameBeziPackets.IDOFBEZI:
-			if(IAmBezimienny() && system.bezimiennyID != data.tointeger())
-			{
-				system.bezimiennyID = data.tointeger();
-				LoadHero();
-			}
-			else
-			{
-				system.bezimiennyID = data.tointeger();
-				if(IAmBezimienny())
-				{
-					BecomeTheBezimienny();
-				}
-			}
-			break;
 		case GameBeziPackets.SENDTIME:
 			system.gameTimer.SetTime(data.tointeger());
 			break;
@@ -255,7 +266,7 @@ class GameBezimienny extends StandardProperties
 			break;
 		case GameBeziPackets.GAMEEND:
 			GameEnd(data);
-			timers.sameEnd <- setTimerClass(gameSystem, "endGame", 5000, false)
+			
 		}
 	}
 	
@@ -263,9 +274,6 @@ class GameBezimienny extends StandardProperties
 	{
 		completeHeal();
 		LoadHero();
-		local pos = system.spawns[random(system.spawns.len())];
-		setPosition(pos.x, pos.y, pos.z);
-		setAngle(pos.a);
 	}	
 
 	function onDie()

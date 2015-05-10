@@ -78,6 +78,7 @@ function onKey(key)
 //Timer
 function onUpdate() // 100ms
 {
+	rand();
 	eventsUpdate.Call();
 }
 function onTimerEnd(object)

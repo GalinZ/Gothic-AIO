@@ -72,11 +72,15 @@ class GameSystem extends StandardProperties
 	
 	function ConvertMyData(params)
 	{
-		local data = sscanf("dd", params);
+		local data = sscanf("ddd", params);
 		if(data)
 		{
 			myId = data[0];
 			maxSlots = data[1];
+			for(local i = 0; i<data[2]; i++)
+			{
+				rand();
+			}
 		}
 	}
 
