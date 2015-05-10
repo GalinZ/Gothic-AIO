@@ -38,8 +38,13 @@ function PerPoint(percent)
 	return result.tointeger();
 };
 
+function GetLinePos(startPos, spacePx, line)
+{
+	return startPos + (PxToPoint(spacePx, "y") * (line));
+}
+
 //Przesy³anie Nazwy gracza przez pakiety
-function ConvertName(text, fromChar, toChar)
+function convertName(text, fromChar, toChar)
 {
 	local i = 0;
 	local last = 0;
@@ -153,7 +158,6 @@ function readLine(handle)
     {
         local char = handle.readn('b');
         line += char.tochar();
-        
         if (char == '\n')
 		{
 			return line
@@ -173,18 +177,132 @@ function SavePosition(path, additionalMessage = "")
 	writeToFile(path, text, "a");
 }
 
-
 function sscanfMulti(params, text)
 {
+	text = convertName(text, "\n", " ");
 	text += " protectionWord";
 	params += "s";
 	local table = [];
 	local result;
-	while ( result == sscanf(params, text))
+	while ( result = sscanf(params, text))
 	{
-		params = result.pop();
+		text = result.pop();
 		table.push(result);
 	}
 	return table.len() ? table : null;
 }
 
+
+function readParameterFile(path)
+{
+	local params ={};
+	local paramFile = file(path, "r");
+	do
+	{
+		local line = readLine(paramFile)
+		if(line != "" )
+		{	
+			local parts;
+			try
+			{
+				parts = sscanf("ss", line)
+				if(parts[0] == "//")
+				{
+					continue;
+				}			
+			}
+			catch(error)
+			{
+				continue;
+			}
+			
+			local headers = parts[0];
+			if(parts[0].find("_"))
+			{
+				headers = split(parts[0], "_");
+			}
+			
+			local data = convertName(parts[1], "\n", "");
+			if(parts[1].find(" "))
+			{
+				data = split(parts[1], " ");
+			}
+			
+			if(typeof(headers) == "string" && typeof(data) == "string")
+			{
+				params[headers] <- convertToNumber(data);
+			}
+			else
+			{	
+				local max = 0;
+				local title = "";
+				if(typeof(headers) == "string")
+				{
+					max = data.len();
+					title = headers;
+				}
+				else
+				{
+					title = headers[0];
+					if(typeof(data) == "string")
+					{
+						max = headers.len() - 1;
+					}
+					else
+					{
+						max = headers.len() - 1 >= data.len() ? headers.len() - 1 : data.len();
+					}
+				}				
+				params[title] <-{};
+				
+				local index = 0;
+				for(local i=0; i<max; i++)
+				{
+					local newSlot;
+					if(typeof(headers) == "array" && headers.len() > i + 1)
+					{
+						newSlot = headers[i + 1]; 
+					}
+					else 
+					{
+						newSlot = index++; 
+					}
+					
+					local newData;
+					if(typeof(data) == "array" && data.len() > i)
+					{
+						newData = data[i]; 
+					}
+					else
+					{
+						newData = null; 
+						if(typeof(data) == "string" && i == 0)
+						{
+							newData = data; 
+						}
+					}
+					params[title][newSlot] <- convertToNumber(newData); 
+				}
+			}
+		}
+		else
+		{
+			break;
+		}
+	}while(true)
+	
+	return params;
+}
+
+function convertToNumber(value)
+{
+	try
+	{
+		local newValue = value.tointeger();
+		return newValue;
+	}
+	catch(error)
+	{
+		return value;
+	}
+}

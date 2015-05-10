@@ -43,7 +43,7 @@ class GameSystem extends StandardProperties
 		currGame = "NONE"
 	}
 	
-	function Init()
+	function init()
 	{
 		hookCallbacks();
 	}
@@ -61,7 +61,7 @@ class GameSystem extends StandardProperties
 		if(name in listOfGame)
 		{
 			currGame = name;
-			listOfGame[currGame].Init();
+			listOfGame[currGame].init();
 			eventsPacket.Add("onPacket", listOfGame[currGame]);
 		}
 		else
@@ -88,10 +88,25 @@ class GameSystem extends StandardProperties
 		}
 	}
 
-	function clearGame()
+	function endGame()
 	{
-		listOfGame[name].deinit();
+		listOfGame[currGame].deinit();
 		currGame = "NONE"
+		restartHero();
+	}
+
+	function restartHero()
+	{
+		setInstance("PC_HERO");
+		setDefaultCamera();
+		clearInventory();
+		local character = HeroAttributes(40, 0, 10, 10, 0, 0, 0, 0, 0);
+		character.UpdateHero();
+		
+		enableGameNpcs(false);
+		enableGameKeys(true);
+		enableInterface(true);
+		setSavingEnabled(false);
 	}
 //	C A L L B A C K S
 	function hookCallbacks()

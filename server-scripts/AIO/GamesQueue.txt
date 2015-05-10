@@ -1,2 +1,1 @@
-Gra1 Bezimienny Sen.txt 5 NULL
-Gra_2 Bezimienny Sen.txt 3 NULL
+Gra1 Bezimienny BezimiennyDeafualt.txt 5 NULL

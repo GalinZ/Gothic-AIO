@@ -118,7 +118,7 @@ function onTimerEnd(object)
 function onInit()
 {
 	setTimer(onUpdate, 100, true);
-	gameSystem.Init();
+	gameSystem.init();
 	//gameSystem.LoadGame("Bezimienny");
 	if(DEBUG)
 	{

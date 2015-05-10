@@ -102,6 +102,7 @@ class Timer extends StandardProperties
 		local text = format("%02d:%02d:%d", m, s, ms);
 		draw = createDraw(text, font, x, y, r, g, b);
 		setDrawVisible(draw, visible);
+		return draw.weakref();
 	}
 	
 	function UpdateDraw()

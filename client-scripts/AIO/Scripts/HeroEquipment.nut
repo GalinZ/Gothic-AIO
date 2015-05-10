@@ -94,6 +94,15 @@ class HeroEquipment
 			}
 		}while(true)
 	}
+	
+	function getFromFile(path)
+	{
+		local newItems = readParameterFile("server-scripts\\AIO\\Parameters\\HeroEquipment\\" + path);
+		foreach(item in newItems)
+		{
+			Add(item[0], item[1], item[2], item[3]);
+		}
+	}
 }
 
 class Item

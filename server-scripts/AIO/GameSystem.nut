@@ -58,7 +58,7 @@ class GameSystem extends StandardProperties
 		isGameInit = false;
 	}
 	
-	function Init()
+	function init()
 	{
 		LoadAllGames();
 		hookCallbacks();
@@ -95,13 +95,19 @@ class GameSystem extends StandardProperties
 		if(gameToCreate)
 		{
 			print(format("Zaladowano gre %s", name));
-			currGame = name;
-			listOfGame[gameToCreate.gameName].Init();
+			currGame = gameToCreate.gameName;
+			listOfGame[gameToCreate.gameName].init(gameToCreate.params);
 		}
 		else
 		{
 			print(format("Nie poprawna nazwa %s", name));
 		}
+	}
+	
+	function endGame()
+	{
+		listOfGame[currGame].deinit();
+		currGame = "NONE"
 	}
 	
 	function AddPlayer(pid)
@@ -211,7 +217,7 @@ class GameSystem extends StandardProperties
 		switch(command)
 		{
 		case "start":
-			listOfGame[currGame].Init();
+			listOfGame[currGame].init();
 			break;
 		case "end":
 			listOfGame[currGame].DeInit();
@@ -226,7 +232,7 @@ class GameSystem extends StandardProperties
 			if(isGameInit)
 			{
 /*
-				listOfGame[currGame].Init();
+				listOfGame[currGame].init();
 				gameTimer.SetTime(waitForStartGame);
 				gameTimer.Start();
 				isGameInit = true;
@@ -255,7 +261,7 @@ class Game
 	
 	constructor(_ownName, _gameName, _params, _minPlayers, _addons)
 	{
-		ownName = ConvertName(_ownName, "_", " ");
+		ownName = convertName(_ownName, "_", " ");
 		gameName= _gameName;
 		params 	= _params;
 		minPlayers 	= _minPlayers;
@@ -270,7 +276,7 @@ class Game
 			print("ListOfGame nie posiada gry : " + _name);
 			return false;
 		}
-		// Test czy plik parametrÃ³w jest
+		// Test czy plik parametrów jest
 		local myfile;
 		try
 		{
@@ -279,10 +285,10 @@ class Game
 		}
 		catch(error)
 		{
-			print("Nie ma pliku parametrÃ³w o naziwe: " + _params);
+			print("Nie ma pliku parametrów o naziwe: " + _params);
 			return false;
 		}
-		// Test czy sÄ… dodatki
+		// Test czy s¹ dodatki
 		if(_addons != "NULL")
 		{
 			myfile = null;

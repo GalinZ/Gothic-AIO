@@ -1,4 +1,4 @@
-/* Only Client
+/* C L I E N T    O N L Y 
 function PointToPx(value, mode)
 {
 	local res = getResolution();
@@ -37,10 +37,15 @@ function PerPoint(percent)
 	local result = 81.92 * percent;
 	return result.tointeger();
 };
+
+function GetLinePos(startPos, spacePx, line)
+{
+	return startPos + (PxToPoint(spacePx, "y") * (line));
+}
 */
 
-//PrzesyÂ³anie Nazwy gracza przez pakiety
-function ConvertName(text, fromChar, toChar)
+//Przesy³anie Nazwy gracza przez pakiety
+function convertName(text, fromChar, toChar)
 {
 	local i = 0;
 	local last = 0;
@@ -76,7 +81,7 @@ function ConvertName(text, fromChar, toChar)
 	return newText;
 }
 
-//System tworzenia timerÃ³w w klasach
+//System tworzenia timerów w klasach
 function setTimerClass(_inst, _func, _time, _repeat, _params = null)
 {
 	local object ={inst = _inst, func = _func , params = _params}
@@ -95,7 +100,7 @@ function classTimer(object)
 	}
 }
 
-//Funkcja losujÂ¹ca
+//Funkcja losuj¹ca
 function random(value1, value2 = null)
 {
 	if(value2 == null)
@@ -115,7 +120,7 @@ function random(value1, value2 = null)
 	}
 }
 
-//System plikÃ³w
+//System plików
 function writeToFile(path, text, mode)
 {
 	local myfile = file(path, mode);
@@ -154,7 +159,6 @@ function readLine(handle)
     {
         local char = handle.readn('b');
         line += char.tochar();
-		//print(char + " " + char.tochar())
         if (char == '\n')
 		{
 			return line
@@ -164,18 +168,19 @@ function readLine(handle)
     return line;
 }
 
+//Pomocne - Zapis pozycji do pliku
 function SavePosition(id, path, additionalMessage = "")
 {
     local pos = getPosition(id);
 	local angle = 0;
 	local text = format("%d %d %d %d %s", pos.x, pos.y, pos.z, angle, additionalMessage)
-	print("Dodano pozycjÃª " + text)
+	print("Dodano pozycje " + text)
 	writeToFile(path, text, "a");
 }
 
 function sscanfMulti(params, text)
 {
-	text = ConvertName(text, "\n", " ");
+	text = convertName(text, "\n", " ");
 	text += " protectionWord";
 	params += "s";
 	local table = [];
@@ -189,43 +194,95 @@ function sscanfMulti(params, text)
 }
 
 
-function readParametersFile(path)
+function readParameterFile(path)
 {
 	local params ={};
 	local paramFile = file(path, "r");
 	do
 	{
 		local line = readLine(paramFile)
-		if(line)
-		{
-			local parts = sscanf("ss", line)
-			local headers = stringSplit(parts[0], "_");
-			local data = stringSplit(parts[1], " ");
-			if(headers.len() == 1 && data.len() == 1)
+		if(line != "" )
+		{	
+			local parts;
+			try
 			{
-				params[headers[0]] <- data[0];
+				parts = sscanf("ss", line)
+				if(parts[0] == "//")
+				{
+					continue;
+				}			
+			}
+			catch(error)
+			{
+				continue;
+			}
+			
+			local headers = parts[0];
+			if(parts[0].find("_"))
+			{
+				headers = split(parts[0], "_");
+			}
+			
+			local data = convertName(parts[1], "\n", "");
+			if(parts[1].find(" "))
+			{
+				data = split(parts[1], " ");
+			}
+			
+			if(typeof(headers) == "string" && typeof(data) == "string")
+			{
+				params[headers] <- convertToNumber(data);
 			}
 			else
-			{
-				local max = headers.len() >= data.len() ? headers.len() : data.len();
-				local title = [headers[0]]
-				params[title] <-{};
-				
-				local index = 0;
-				for(local i=1; i<max; i++)
+			{	
+				local max = 0;
+				local title = "";
+				if(typeof(headers) == "string")
 				{
-					if(headers.len() <= i)
+					max = data.len();
+					title = headers;
+				}
+				else
+				{
+					title = headers[0];
+					if(typeof(data) == "string")
 					{
-						params[title][index++] <- data[i]; 
-					}
-					else if(data.len() <= i)
-					{
-						params[title][headers[i]] <- null; 
+						max = headers.len() - 1;
 					}
 					else
 					{
-						params[title][headers[i]] <- data[i]; 
+						max = headers.len() - 1 >= data.len() ? headers.len() - 1 : data.len();
 					}
+				}				
+				params[title] <-{};
+				
+				local index = 0;
+				for(local i=0; i<max; i++)
+				{
+					local newSlot;
+					if(typeof(headers) == "array" && headers.len() > i + 1)
+					{
+						newSlot = headers[i + 1]; 
+					}
+					else 
+					{
+						newSlot = index++; 
+					}
+					
+					local newData;
+					if(typeof(data) == "array" && data.len() > i)
+					{
+						newData = data[i]; 
+					}
+					else
+					{
+						newData = null; 
+						if(typeof(data) == "string" && i == 0)
+						{
+							newData = data; 
+						}
+					}
+					params[title][newSlot] <- convertToNumber(newData); 
 				}
 			}
 		}
@@ -234,5 +291,19 @@ function readParametersFile(path)
 			break;
 		}
 	}while(true)
+	
+	return params;
+}
 
+function convertToNumber(value)
+{
+	try
+	{
+		local newValue = value.tointeger();
+		return newValue;
+	}
+	catch(error)
+	{
+		return value;
+	}
 }

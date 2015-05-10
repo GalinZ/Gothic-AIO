@@ -2,7 +2,7 @@
 enum GameBeziTeams
 {
 	SOLDIERS,
-	BEZI
+	BEZI,
 }
 
 enum GameBeziPackets
@@ -31,12 +31,11 @@ class GameBezimienny extends StandardProperties
 	events = null;
 	
 	//I N I T 
-	function Init()
+	function init()
 	{
 		base.constructor();
 		events ={};
 		system ={
-			base.constructor()
 			state = GameState.INIT,
 			bezimiennyID = -1,
 			gameTime = -1,
@@ -49,20 +48,20 @@ class GameBezimienny extends StandardProperties
 			spawns = [],
 		}
 		
-		system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
+		draws.gameTimer <- system.gameTimer.ConnectDraw(6000, 200, "FONT_OLD_20_WHITE_HI.TGA", 255, 255, 255);
 		CreateScoreBoard();
 
 		hookCallbacksInit()
 	} 
 	
-	function DeInit()
+	function deinit()
 	{
+		base.destroyProperties();
 		system = null;
 		events = null;
-		base.destroyProperties();
 	}
 	//W A I T ___ F O R  ___ P A R A M S
-	function GetStandardEquipment(forWho, params)
+	function getStandardEquipment(forWho, params)
 	{
 		if(forWho == GameBeziTeams.SOLDIERS)
 		{
@@ -74,25 +73,23 @@ class GameBezimienny extends StandardProperties
 		}	
 	}
 	
-	function GetStandarHeroAttributes(forWho, params)
+	function getStandarHeroAttributes(forWho, params)
 	{
+		
 		//Hp, mp, str, dex,
 		//1h, 2h, bow, cbow, mlvl,
-		//protS, protO, protA, prot M
-		local atr = sscanf("ddddddddddddd", params);
+		local atr = sscanf("ddddddddd", params);
 		if(atr)
 		{
 			if(forWho == GameBeziTeams.SOLDIERS)
 			{
 				system.soldierAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
-								atr[4], atr[5], atr[6], atr[7], atr[8], 
-								atr[9], atr[10], atr[11], atr[12]);
+										atr[4], atr[5], atr[6], atr[7], atr[8]);
 			}
 			else if(forWho == GameBeziTeams.BEZI)
 			{
 				system.beziAtr = HeroAttributes(atr[0], atr[1], atr[2], atr[3],
-							atr[4], atr[5], atr[6], atr[7], atr[8], 
-							atr[9], atr[10], atr[11], atr[12]);				
+										atr[4], atr[5], atr[6], atr[7], atr[8]);				
 			}
 		}
 	}
@@ -137,9 +134,19 @@ class GameBezimienny extends StandardProperties
 		system.gameTimer.Start();
 	}
 	
-	function GameEnd()
+	function GameEnd(data)
 	{
-	
+		local scores = sscanfMulti("ds", data);
+		for(local i=0; i<scores.len(); i++)
+		{
+			local text = format("%d - %s", scores[i][0], scores[i][1]);
+			local index = format("endScores%d",i);
+			draws[index] <- createDraw(text, "FONT_OLD_20_WHITE_HI.TGA",
+					3000, GetLinePos(2500, 25, i), 255, 255, 255);
+			setDrawVisible(draws[index], true);
+		}
+		
+		unhookCallbacks();
 	}
 	
 	function BecomeTheBezimienny()
@@ -166,27 +173,12 @@ class GameBezimienny extends StandardProperties
 				{
 					setDrawColor(draws.scoreBoard[index], 255, 255, 255);
 				}
-				setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)", params[2], ConvertName(params[1], "_", " "), params[0]));
+				setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)", params[2], convertName(params[1], "_", " "), params[0]));
 				index++;
 				scores = params[3];
 			}
 			else
 			{
-			/*	local params = sscanf("dsd", scores)
-				if(params)
-				{
-					if(params[0] == system.bezimiennyID)
-					{
-						setDrawColor(draws.scoreBoard[index], 255, 0, 0);
-					}
-					else
-					{
-						setDrawColor(draws.scoreBoard[index], 255, 255, 255);
-					}
-					setDrawText(draws.scoreBoard[index], format("%04d : %s (%d)",params[2], ConvertName(params[1], "_", " "), params[0]));
-					index++;
-				}
-			*/
 				break;
 			}
 		}while(true && index < 20);
@@ -226,16 +218,16 @@ class GameBezimienny extends StandardProperties
 		switch(packetID)
 		{
 		case GameBeziPackets.EQFORSOLDIER:
-			GetStandardEquipment(GameBeziTeams.SOLDIERS, data);
+			getStandardEquipment(GameBeziTeams.SOLDIERS, data);
 			break;
 		case GameBeziPackets.EQFORBEZI:
-			GetStandardEquipment(GameBeziTeams.BEZI, data);
+			getStandardEquipment(GameBeziTeams.BEZI, data);
 			break;
 		case GameBeziPackets.ATRFORSOLDIER:
-			GetStandarHeroAttributes(GameBeziTeams.SOLDIERS, data);
+			getStandarHeroAttributes(GameBeziTeams.SOLDIERS, data);
 			break;
 		case GameBeziPackets.ATRFORBEZI:
-			GetStandarHeroAttributes(GameBeziTeams.BEZI, data);
+			getStandarHeroAttributes(GameBeziTeams.BEZI, data);
 			break;
 		case GameBeziPackets.IDOFBEZI:
 			if(IAmBezimienny() && system.bezimiennyID != data.tointeger())
@@ -262,8 +254,8 @@ class GameBezimienny extends StandardProperties
 			GameStart();
 			break;
 		case GameBeziPackets.GAMEEND:
-			ShowMatchResult(data);
-			timers.sameEnd = setTimerClass(gameSystem, "serverMessage", 30 * 1000, true)
+			GameEnd(data);
+			timers.sameEnd <- setTimerClass(gameSystem, "endGame", 5000, false)
 		}
 	}
 	

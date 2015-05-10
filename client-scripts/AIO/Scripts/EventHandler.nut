@@ -103,4 +103,3 @@ class EventHandler
 		listOfFunc.clear();
 	}
 }
-

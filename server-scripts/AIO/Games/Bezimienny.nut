@@ -28,7 +28,7 @@ class GameBezimienny extends StandardProperties
 	parameters = null;
 	
 	// I N I T
-	function Init()
+	function init(paramFile)
 	{
 		timers ={};
 		events ={};
@@ -36,43 +36,64 @@ class GameBezimienny extends StandardProperties
 		system ={
 			players	= [],
 			bezimienny = -1,
-			
 			state = GameState.INIT,
 			gameTime = Timer(TimerModes.TOZERO),
-			
-			points ={
-				beziSuicide = -500,
-				teamKill = -150,
-				suicide = -100,
-				hitBezi = 10,
-				killSoldier = 50,
-				killBezi = 100,
-			},
+			soldierEq = HeroEquipment(),
+			soldierAtr = HeroAttributes(),									
+			beziEq = HeroEquipment(),
+			beziAtr = HeroAttributes()
 		};
 		
 		parameters ={
-			minPlayers = 3,
-			roundTime = 5*60, 
-			delayTime = 1*60,
-			mapSpawns = "spawns_castle",
-			mapVobs = "NULL",
+			roundTime = 60, 
+			//mapSpawns = "None",
+			//mapVobs,
 				
-			soldierAtr = HeroAttributes(360, 0, 54, 35,
-									100, 100, 0, 100, 0,
-									0, 0, 0, 0),
-			soldierEq = HeroEquipment(),
-									
-			beziAtr = HeroAttributes(1000, 0, 55, 0,
-									0, 100, 0, 0, 0,
-									0, 0, 0, 0),
-			beziEq = HeroEquipment(),
+			points ={
+				suicide = -50,
+				suicideBezi = -100,
+				teamKill = -50,
+				hitBezi = 5,
+				killSoldier = 50, 
+				killBezi = 100,
+			}
 		};
 		
-		StandardEquipment();
+		loadParams(paramFile);
 		StandardFunctions();
 		GameInitPlayers();
 	}
-		
+	
+	function loadParams(paramFile)
+	{
+		local table = readParameterFile("server-scripts\\AIO\\Games\\Parameters\\"+paramFile);
+		foreach(key, var in table)
+		{
+			switch(key)
+			{
+			//Special commands
+			case "soldierEq":
+				system.soldierEq.getFromFile(var);
+				break;
+			case "soldierAtr":
+				system.soldierAtr.getFromFile(var);
+				break;
+			case "beziEq":
+				system.beziEq.getFromFile(var);
+				break;
+			case "beziAtr": 
+				system.beziAtr.getFromFile(var);
+				break;
+			case "spawns":
+				break;
+			//Other parameters will be assigned to table of parameters
+			default:
+				parameters[key] = var;
+				break;
+			}
+		}
+	}
+	
 	function deinit()
 	{		
 		base.destroyProperties();
@@ -93,20 +114,7 @@ class GameBezimienny extends StandardProperties
 		events[GameBeziFuncs.SOLDIER_KILL_BEZI].Add("SoldierKillBezi", this);
 		events[GameBeziFuncs.SOLDIER_HIT_BEZI].Add("SoldierHitBezi", this);
 	} 
-		
-	function StandardEquipment()
-	{
-		//Soldier equipment
-		parameters.soldierEq.Add("GRD_ARMOR_M", 1, 1, ItemType.ARMOR);
-		parameters.soldierEq.Add("ITMW_1H_SWORD_LONG_05", 1, 1, ItemType.MELLE);
-		parameters.soldierEq.Add("ITRW_CROSSBOW_01", 1, 1, ItemType.DISTANCE);
-		parameters.soldierEq.Add("ITAMBOLT", 10, 1, ItemType.OTHER);
-		
-		//Bezimienny equipment
-		parameters.beziEq.Add("ORE_ARMOR_H", 1, 1, ItemType.ARMOR);
-		parameters.beziEq.Add("MYTHRILKLINGE03", 1, 1, ItemType.MELLE);
-	}
-	
+			
 	function SendPacketToAll(packet, prior = 1)
 	{
 		foreach(player in system.players)
@@ -118,7 +126,7 @@ class GameBezimienny extends StandardProperties
 	function GameInitPlayers()
 	{
 		LoadPlayers();
-		system.gameTime.SetTime(parameters.roundTime * 100);
+		system.gameTime.SetTime(parameters.roundTime * 1000);
 		SendPacketToAll(format("%d Bezimienny" ,GameSystemPacket.INIT_GAME), 2);
 		SendPacketToAll(format("%d %d", GameBeziPackets.SENDTIME, system.gameTime.GetTime()), 2);
 		GameStartSendParameters();
@@ -148,11 +156,11 @@ class GameBezimienny extends StandardProperties
 	
 	function GameStartSendParameters(player = -1)
 	{
-		local paramsAtrB = GameBeziPackets.ATRFORBEZI + " " + parameters.beziAtr.tostring();
-		local paramsEqB = GameBeziPackets.EQFORBEZI + " " + parameters.beziEq.tostring();
+		local paramsAtrB = GameBeziPackets.ATRFORBEZI + " " + system.beziAtr.tostring();
+		local paramsEqB = GameBeziPackets.EQFORBEZI + " " + system.beziEq.tostring();
 		
-		local paramsAtrS = GameBeziPackets.ATRFORSOLDIER + " " + parameters.soldierAtr.tostring();
-		local paramsEqS = GameBeziPackets.EQFORSOLDIER + " " + parameters.soldierEq.tostring();
+		local paramsAtrS = GameBeziPackets.ATRFORSOLDIER + " " + system.soldierAtr.tostring();
+		local paramsEqS = GameBeziPackets.EQFORSOLDIER + " " + system.soldierEq.tostring();
 		
 		if(player == -1)
 		{
@@ -221,6 +229,8 @@ class GameBezimienny extends StandardProperties
 			message += format(" %d %s(%d)", podium, system.players[i].name, system.players[i].id)			
 		}
 		SendPacketToAll(message);
+		unhookCallbacks();
+		gameSystem.endGame();
 	}
 	
 	//G A M E ___ L O G I C
@@ -237,14 +247,14 @@ class GameBezimienny extends StandardProperties
 	
 	function SoldierHitBezi(soldier, bezi)
 	{
-		AddPoints(pid, system.points.hitBezi);
+		AddPoints(soldier, system.points.hitBezi);
 	}
 	
 	function Suicide(victim)
 	{
 		if(victim == system.bezimienny)
 		{
-			AddPoints(victim, system.points.beziSuicide);
+			AddPoints(victim, system.points.suicideBezi);
 			ChooseBezimienny();
 		}
 		else
@@ -269,7 +279,7 @@ class GameBezimienny extends StandardProperties
 		local packet = GameBeziPackets.UPDATESCORE.tostring();
 		foreach(player in system.players)
 		{
-			packet += format(" %d %s %d", player.id, ConvertName(player.name, " ", "_"), player.points);
+			packet += format(" %d %s %d", player.id, convertName(player.name, " ", "_"), player.points);
 		}
 		
 		SendPacketToAll(packet)

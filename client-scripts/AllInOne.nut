@@ -87,7 +87,7 @@ function onTimerEnd(object)
 
 function onInit()
 {
-	gameSystem.Init();
+	gameSystem.init();
 	setTimer(onUpdate, 100, true);
 }
 

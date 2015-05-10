@@ -9,14 +9,9 @@ class HeroAttributes
 	bow = null;
 	cbow = null;
 	mlvl = null;
-	protS = null;
-	protO = null;
-	protA = null;
-	protM = null;
 	
 	constructor(_hp = 100, _mp = 0, _str = 0, _dex = 0,
-				_h1 = 0, _h2 = 0, _bow = 0, _cbow = 0, _mlvl = 0, 
-				_protS = 0, _protO = 0, _protA = 0, _protM = 0)
+				_h1 = 0, _h2 = 0, _bow = 0, _cbow = 0, _mlvl = 0)
 	{
 		hp = _hp;
 		mp = _mp;
@@ -27,18 +22,13 @@ class HeroAttributes
 		bow = _bow;
 		cbow = _cbow;
 		mlvl = _mlvl;
-		protS = _protS;
-		protO = _protO;
-		protA = _protA;
-		protM = _protM;
 	}	
 	
 	function _tostring()
 	{
-		return format("%d %d %d %d %d %d %d %d %d %d %d %d %d",
+		return format("%d %d %d %d %d %d %d %d %d",
 						hp, mp, str, dex, 
-						h1, h2,	bow, cbow, mlvl,
-						protS, protO, protA, protM);
+						h1, h2,	bow, cbow, mlvl);
 	}
 
 	function UpdateHero()
@@ -53,10 +43,28 @@ class HeroAttributes
 		setWeaponSkill(2, h2);
 		setWeaponSkill(3, bow);
 		setWeaponSkill(4, cbow);
-		//protS
-		//protO
-		//protA
-		//protM
 	}
+
+/* S E R V E R   O N L Y
+	function getFromFile(path)
+	{
+		local newParams = readParameterFile("server-scripts\\AIO\\Parameters\\HeroAttributes\\" + path);
+		foreach(key, var in newParams)
+		{
+			switch(key)
+			{
+			case "hp":	hp = var; break;
+			case "mp":	mp = var; break;
+			case "str":	str = var; break;
+			case "dex":	dex = var; break;
+			case "h1":	h1 = var; break;
+			case "h2":	h2 = var; break;
+			case "bow":	bow = var; break;
+			case "cbow":cbow = var; break;
+			case "mlvl":mlvl = var; break;
+			}
+		}
+	}
+*/
 }
 

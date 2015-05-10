@@ -66,7 +66,6 @@ function onTimerEndDebug(object)
 }
 function onInitDebug()
 {
-
 }
 
 eventsPacket.Add(onPacketDebug);
